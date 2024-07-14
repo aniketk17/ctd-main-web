@@ -3,14 +3,14 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet'); // For setting secure HTTP headers
 const rateLimit = require('express-rate-limit');
 const db = require('./config/db.js')
-const User = require('./models/user.models.js')
+const User = require('./models/user.model.js')
 const Cart = require('./models/cart.model.js')
 const bodyParser = require('body-parser')
 
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
-const protectedRoutes = require('./routes/protected');
+const protectedRoutes = require('./routes/api.routes.js');
 
 const app = express();
 
@@ -28,7 +28,7 @@ app.use(limiter);
 
 
 app.use('/auth', authRoutes);
-app.use('/protected', protectedRoutes);
+app.use('/api', protectedRoutes);
 
 const initApp = async () => {
     console.log("Testing the database connection..");

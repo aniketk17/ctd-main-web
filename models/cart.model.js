@@ -1,6 +1,6 @@
 const { Sequelize, DataTypes } = require("sequelize");
 const db = require('../config/db.js');
-const User = require("./user.models.js");
+const User = require("./user.model.js");
 
 const Cart = db.define('Cart', {
     cart_id: {
@@ -34,3 +34,5 @@ User.hasMany(Cart, { foreignKey: 'user1' });
 User.hasMany(Cart, { foreignKey: 'user2' });
 Cart.belongsTo(User, { foreignKey: 'user1' });
 Cart.belongsTo(User, { foreignKey: 'user2' });
+
+module.exports = Cart

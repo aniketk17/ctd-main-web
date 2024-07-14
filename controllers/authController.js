@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../config/db.js');
 require('dotenv').config();
 const { v4: uuidv4 } = require('uuid');
-const User = require('../models/user.models.js');
+const User = require('../models/user.model.js');
 const { json } = require('sequelize');
 
 const generateUserId = () => {
@@ -20,12 +20,12 @@ const register = async (req, res) => {
   try {
 
 
-    const existingUserByEmail = await db.User.findOne({ where: { email } });
+    const existingUserByEmail = await User.findOne({ where: { email } });
     if (existingUserByEmail) {
       return res.status(400).json({ message: 'Email is already taken' });
     }
 
-    const existingUserByUsername = await db.User.findOne({ where: { username } });
+    const existingUserByUsername = await User.findOne({ where: { username } });
     if (existingUserByUsername) {
       return res.status(400).json({ message: 'Username is already taken' });
     }
@@ -56,11 +56,11 @@ const login = async (req, res) => {
   const { email, username, password } = req.body;
 
   if (!password) {
-    return res.status(400).json({ error: "password field is required." })
+    return res.status(400).json({ message: "password field is required." })
   }
 
   if (!email && !password) {
-    return res.status(400).json({ error: "email or username field is required." })
+    return res.status(400).json({ message: "email or username field is required." })
   }
 
 
@@ -73,7 +73,7 @@ const login = async (req, res) => {
 
     //jwt expires in 1 day
     //cookie setting refresh once
-    const accessToken = jwt.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+    const accessToken = jwt.sign({ userId: user.id, email: user.email, username: user.username }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 
     res.cookie('jwt', accessToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 24 * 60 * 60 * 1000 });
     res.json({ message: 'Logged in successfully', userId: user.user_id });
