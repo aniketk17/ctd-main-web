@@ -4,7 +4,10 @@ const db = require('../config/db.js');
 require('dotenv').config();
 const { v4: uuidv4 } = require('uuid');
 const User = require('../models/user.model.js');
-const { json } = require('sequelize');
+const { Op } = require('sequelize');
+const sendEmail = require('../utils/email.util.js')
+const crypto = require('crypto')
+
 
 const generateUserId = () => {
   return uuidv4().slice(0, 8);
@@ -88,5 +91,66 @@ const logout = (req, res) => {
 };
 
 //add forgot password
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
 
-module.exports = { register, login, logout };
+  if (!email) {
+    return res.status(400).json({ message: "email field is required." })
+  }
+
+  try {
+    const user = await User.findOne({ where: { email } })
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const otpExpiration = new Date(Date.now() + process.env.OTP_EXPIRATION * 60000);
+
+    await user.update({ email_otp: otp, otp_expiration: otpExpiration });
+
+    await sendEmail(user.email, 'Password Reset OTP', `Your OTP is: ${otp}`);
+    return res.status(200).json({ message: "OTP has been sent to your email." })
+
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+}
+
+const resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body
+
+
+  if (!email || !otp || !newPassword) {
+    return res.status(400).json({ message: 'Email, OTP, and new password are required' });
+  }
+
+  try {
+    const user = await User.findOne({
+      where: {
+        email,
+        email_otp: otp,
+        otp_expiration: {
+          [Op.gt]: new Date(),
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid OTP or OTP expired' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS));
+    await user.update({ password: hashedPassword, otp: null, otpExpiration: null });
+
+    res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+
+module.exports = { register, login, logout, forgotPassword, resetPassword};

@@ -43,6 +43,14 @@ const User = db.define('User', {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
     },
+    email_otp: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    otp_expiration: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
     password: {
         type: DataTypes.STRING,
         allowNull: false,
