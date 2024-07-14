@@ -2,7 +2,11 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet'); // For setting secure HTTP headers
 const rateLimit = require('express-rate-limit');
-const csrf = require('csurf');
+const db = require('./config/db.js')
+const User = require('./models/user.models.js')
+const Cart = require('./models/cart.model.js')
+const bodyParser = require('body-parser')
+
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
@@ -10,6 +14,7 @@ const protectedRoutes = require('./routes/protected');
 
 const app = express();
 
+app.use(bodyParser.urlencoded({extended:true}))
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
@@ -21,23 +26,24 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// CSRF protection
-const csrfProtection = csrf({ cookie: true });
-app.use(csrfProtection);
-
-// Middleware to send CSRF token as a cookie
-app.use((req, res, next) => {
-    res.cookie('XSRF-TOKEN', req.csrfToken(), { httpOnly: false });
-    next();
-});
 
 app.use('/auth', authRoutes);
 app.use('/protected', protectedRoutes);
 
-app.get('/csrf-token', (req, res) => {
-    res.json({ csrfToken: req.csrfToken() });
-});
+const initApp = async () => {
+    console.log("Testing the database connection..");
 
+    try {
+        await db.authenticate();
+        await db.sync({alter:true})
+        console.log("Connection has been established successfully.");
+
+    } catch (error) {
+        console.error("Unable to connect to the database:", error.original);
+    }
+}
+
+initApp()
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
