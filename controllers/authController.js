@@ -62,7 +62,7 @@ const login = async (req, res) => {
     return res.status(400).json({ message: "password field is required." })
   }
 
-  if (!email && !password) {
+  if (!email && !username) {
     return res.status(400).json({ message: "email or username field is required." })
   }
 
