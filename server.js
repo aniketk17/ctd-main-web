@@ -2,10 +2,8 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet'); // For setting secure HTTP headers
 const rateLimit = require('express-rate-limit');
-const db = require('./config/db.js')
-const User = require('./models/user.model.js')
-const Cart = require('./models/cart.model.js')
-const bodyParser = require('body-parser')
+const db = require('./config/db.js');
+const bodyParser = require('body-parser');
 
 require('dotenv').config();
 
@@ -14,7 +12,7 @@ const protectedRoutes = require('./routes/api.routes.js');
 
 const app = express();
 
-app.use(bodyParser.urlencoded({extended:true}))
+app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
@@ -43,7 +41,8 @@ const initApp = async () => {
     }
 }
 
-initApp()
+initApp();
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
