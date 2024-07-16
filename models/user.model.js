@@ -5,9 +5,8 @@ const db = require('../config/db.js')
 
 const User = db.define('User', {
     id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey:true,
+        type: DataTypes.STRING,
+        primaryKey: true,
     },
     username: {
         type: DataTypes.STRING,
@@ -39,7 +38,7 @@ const User = db.define('User', {
         allowNull: false,
         unique: true,
     },
-    isJunior: {
+    is_junior: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
     },
@@ -57,6 +56,6 @@ const User = db.define('User', {
     },
 });
 
-module.exports = User
+module.exports = User;      
 
 
