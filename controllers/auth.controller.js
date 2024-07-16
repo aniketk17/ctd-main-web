@@ -37,7 +37,6 @@ const register = async (req, res) => {
         [Op.or]: [
           { email },
           { username },
-          { phone_number },
           { enrollment_number }
         ]
       }
@@ -48,7 +47,6 @@ const register = async (req, res) => {
       const fields = [];
       if (existingUser.email === email) fields.push('Email');
       if (existingUser.username === username) fields.push('Username');
-      if (existingUser.phone_number === phone_number) fields.push('Phone number');
       if (existingUser.enrollment_number === enrollment_number) fields.push('Enrollment number');
       return res.status(400).json({ message: `${message} ${fields.join(', ')}` });
     }
@@ -96,7 +94,7 @@ const login = async (req, res) => {
     }
 
     //jwt expires in 1 day
-    const accessToken = jwt.sign({ userId: user.id, email: user.email, username: user.username }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+    const accessToken = jwt.sign({ id: user.id, email: user.email, username: user.username }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 
     res.cookie('jwt', accessToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 24 * 60 * 60 * 1000 });
     res.json({ message: 'Logged in successfully', userId: user.user_id });
@@ -106,7 +104,14 @@ const login = async (req, res) => {
 };
 
 const logout = (req, res) => {
-  res.cookie('jwt', '', { maxAge: 0 }); // Just empty the 'jwt' cookie
+  
+  // Check if the JWT or session identifier is already absent
+  if (!req.cookies.jwt) {
+    return res.status(401).json({ message: 'Already logged out' });
+  }
+
+  // Clear the 'jwt' cookie by setting its maxAge to 0
+  res.cookie('jwt', '', { maxAge: 0 });
   res.json({ message: 'Logged out successfully' });
 };
 
@@ -127,7 +132,7 @@ const forgotPassword = async (req, res) => {
     const otp = crypto.randomInt(100000, 999999).toString();
     const otpExpiration = new Date(Date.now() + process.env.OTP_EXPIRATION * 60000);
 
-    await user.update({ email_otp: otp, otp_expiration: otpExpiration });
+    await user.update({ otp: otp, otp_expiration: otpExpiration });
 
     await sendEmail(user.email, 'Password Reset OTP', `Your OTP is: ${otp}`);
     return res.status(200).json({ message: "OTP has been sent to your email." })
@@ -150,7 +155,7 @@ const resetPassword = async (req, res) => {
     const user = await User.findOne({
       where: {
         email,
-        email_otp: otp,
+        otp: otp,
         otp_expiration: {
           [Op.gt]: new Date(),
         },

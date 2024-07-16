@@ -1,5 +1,4 @@
-const { where, Op } = require('sequelize')
-const db = require('../config/db.js')
+const { where, Op } = require('sequelize');
 const Cart = require('../models/cart.model.js');
 const User = require('../models/user.model.js');
 
@@ -81,7 +80,6 @@ const addCart = async (req, res) => {
 
         return res.status(201).json({ message: "event added to cart." })
 
-
     } catch (error) {
         console.error("error while adding to cart: ", error)
         return res.status(500).json({ message: "server error" })
@@ -101,92 +99,92 @@ const viewCart = async (req, res) => {
         const allUserEvents = await Cart.findAll({
             where: {
                 [Op.or]: [
-                    {user1: currentUser},
-                    {user2: currentUser},
+                    { user1: currentUser },
+                    { user2: currentUser },
                 ],
             },
         });
-        
+
         let totalPrice = 0;
 
         const cartItemsWithPrices = allUserEvents.map(cartItem => {
-        const eventName = cartItem.event_name;
-        const eventPrice = eventPrices[eventName] || 0;
-        totalPrice += eventPrice;
-        return {
-            eventName: eventName,
-            eventPrice: eventPrice
-        };
+            const eventName = cartItem.event_name;
+            const eventPrice = eventPrices[eventName] || 0;
+            totalPrice += eventPrice;
+            return {
+                eventName: eventName,
+                eventPrice: eventPrice
+            };
         });
 
         res.status(200).json({ cartItems: cartItemsWithPrices, totalPrice: totalPrice });
     }
     catch (error) {
         console.error("Error fetching cart items: ", error);
-        res.status(500).json({ message: "Server Error", error });        
+        res.status(500).json({ message: "Server Error", error });
     }
 }
 
 const deleteCartItem = async (req, res) => {
     const currentUser = req.user.username;
     const eventName = req.params.eventName;
-  
+
     try {
-      // Find the cart item by event name and current user
-      const cartItem = await Cart.findOne({
-        where: {
-          event_name: eventName,
-          [Op.or]: [
-            { user1: currentUser },
-            { user2: currentUser }
-          ]
+        // Find the cart item by event name and current user
+        const cartItem = await Cart.findOne({
+            where: {
+                event_name: eventName,
+                [Op.or]: [
+                    { user1: currentUser },
+                    { user2: currentUser }
+                ]
+            }
+        });
+
+        if (!cartItem) {
+            return res.status(404).json({ message: 'Cart item not found, ERROR' });
         }
-      });
-  
-      if (!cartItem) {
-        return res.status(404).json({ message: 'Cart item not found, ERROR' });
-      }
-  
-      await cartItem.destroy();
-      res.status(200).json({ message: 'Event removed from cart' });
+
+        await cartItem.destroy();
+        res.status(200).json({ message: 'Event removed from cart' });
     } catch (error) {
-      console.error('Error deleting cart item: ', error);
-      res.status(500).json({ message: 'Server error', error });
+        console.error('Error deleting cart item: ', error);
+        res.status(500).json({ message: 'Server error', error });
     }
 };
 
 const deleteCart = async (req, res) => {
     const currentUser = req.user.username;
-  
-    try {
-      // Find all cart items for the current user
-      const cartItems = await Cart.findAll({
-        where: {
-          [Op.or]: [
-            { user1: currentUser },
-            { user2: currentUser }
-          ]
-        }
-      });
-  
-      if (cartItems.length === 0) {
-        return res.status(404).json({ message: 'Cart is already empty' });
-      }
 
-      // Delete all found cart items
-      await Cart.destroy({
-        where: {
-          [Op.or]: [
-            { user1: currentUser },
-            { user2: currentUser }
-          ]
+    try {
+        // Find all cart items for the current user
+        const cartItems = await Cart.findAll({
+            where: {
+                [Op.or]: [
+                    { user1: currentUser },
+                    { user2: currentUser }
+                ]
+            }
+        });
+
+        if (cartItems.length === 0) {
+            return res.status(404).json({ message: 'Cart is already empty' });
         }
-      });
-  
-      res.status(200).json({ message: 'Cart deleted successfully' });
+
+        // Delete all found cart items
+        await Cart.destroy({
+            where: {
+                [Op.or]: [
+                    { user1: currentUser },
+                    { user2: currentUser }
+                ]
+            }
+        });
+
+        res.status(200).json({ message: 'Cart deleted successfully' });
     } catch (error) {
-      console.error('Error deleting cart:', error);
-      res.status(500).json({ message: 'Server error', error });
+        console.error('Error deleting cart:', error);
+        res.status(500).json({ message: 'Server error', error });
     }
 };
 
