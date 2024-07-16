@@ -6,8 +6,8 @@ const { DATABASE_PORT, DATABASE_USERNAME, DATABASE_NAME, DATABASE_PASSWORD, DATA
 const db = new Sequelize(DATABASE_NAME, DATABASE_USERNAME, DATABASE_PASSWORD, {
   host: DATABASE_HOST,
   port: DATABASE_PORT,
-  dialect: 'postgres', 
-  //protocol: 'postgres',
+  dialect: 'postgres',
+  protocol: 'postgres',
   logging: false,
 });
 
