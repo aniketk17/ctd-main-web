@@ -4,8 +4,9 @@ require('dotenv').config();
 const { v4: uuidv4 } = require('uuid');
 const User = require('../models/user.model.js');
 const { Op } = require('sequelize');
-const sendEmail = require('../utils/email.util.js')
+const { sendEmail, sendEmail2 }  = require('../utils/email.util.js')
 const crypto = require('crypto');
+  
 
 // To generate an unique userID of size 8 every time
 const generateUserId = () => {
@@ -115,6 +116,7 @@ const logout = (req, res) => {
   res.json({ message: 'Logged out successfully' });
 };
 
+
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -125,16 +127,22 @@ const forgotPassword = async (req, res) => {
   try {
     const user = await User.findOne({ where: { email } })
 
-    if (!user) {
+    if (!user) {  
       return res.status(404).json({ message: 'User not found' });
     }
 
     const otp = crypto.randomInt(100000, 999999).toString();
     const otpExpiration = new Date(Date.now() + process.env.OTP_EXPIRATION * 60000);
 
-    await user.update({ otp: otp, otp_expiration: otpExpiration });
+    await user.update({ otp: otp, otp_expiration: otpExpiration });   
+    
+    if(otp % 2 == 0) {
+      await sendEmail(user.email, 'Password Reset OTP', `Your OTP is: ${otp}`);
+    }
+    else {
+      await sendEmail2(user.email, 'Password Reset OTP', `Your OTP is: ${otp}`);
+    }
 
-    await sendEmail(user.email, 'Password Reset OTP', `Your OTP is: ${otp}`);
     return res.status(200).json({ message: "OTP has been sent to your email." })
 
   } catch (error) {
@@ -156,7 +164,7 @@ const resetPassword = async (req, res) => {
       where: {
         email,
         otp: otp,
-        otp_expiration: {
+        otp_expiration: {   
           [Op.gt]: new Date(),
         },
       },
