@@ -15,5 +15,7 @@ router.post('/delete/:eventName', authenticateToken, cartController.deleteCartIt
 router.post('/delete_cart', authenticateToken, cartController.deleteCart);
 router.get('/profile', authenticateToken, profileController.getProfile);
 router.patch('/profile', authenticateToken, profileController.updateProfile);
+router.get('/my_orders', authenticateToken, cartController.myOrders);
+router.get('/confirm_team', cartController.confirmTeam);
 
 module.exports = router;
