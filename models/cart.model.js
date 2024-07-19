@@ -27,6 +27,15 @@ const Cart = db.define('Cart', {
     event_name: {
         type: DataTypes.STRING,
         allowNull: false,
+    },
+    team_name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    is_paid: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
     }
 });
 
