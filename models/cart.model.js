@@ -30,12 +30,12 @@ const Cart = db.define('Cart', {
     },
     team_name: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
     },
     is_paid: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
-        allowNull: false
+        allowNull: false,
     }
 });
 
