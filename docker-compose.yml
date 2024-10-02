@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  
+  db:
+    image: postgres:latest #pull form hub
+    environment:
+      POSTGRES_USER: ctdmainadmin
+      POSTGRES_PASSWORD: ctdmain@2024
+      POSTGRES_DB: ctd_test_db_2024
+    ports:
+      - "5432:5432"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://ctdmainadmin:ctdmain@2024@db:5432/ctd_test_db_2024
+      - DATABASE_USERNAME=ctdmainadmin
+      - DATABASE_NAME=ctd_test_db_2024
+      - DATABASE_PASSWORD=ctdmain@2024
+      - DATABASE_HOST=db 
+    depends_on:
+      - db

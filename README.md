@@ -9,6 +9,7 @@ A web application built with Node.js, Express, and PostgreSQL to manage event re
 - [Installation](#installation)
 - [Usage](#usage)
 - [API Endpoints](#api-endpoints)
+- [Docker Support](#docker-support)
 
 ## Features
 
@@ -110,3 +111,114 @@ A web application built with Node.js, Express, and PostgreSQL to manage event re
 ### Payment
 
 - `POST /api/payments`: Process a payment
+
+## Docker Support
+
+This project is set up to run in a Docker environment, allowing for easier deployment and scalability. Follow these steps to get the application running with Docker.
+
+### Prerequisites
+
+- Ensure you have [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/install/) installed on your machine.
+
+### Docker Setup
+
+1. **Clone the repository** (if you haven't already):
+
+    ```sh
+    git clone https://github.com/yourusername/event-registration-platform.git
+    cd event-registration-platform
+    ```
+
+2. **Create a `Dockerfile`**:
+
+    Create a `Dockerfile` in the root of your project with the following content:
+
+    ```dockerfile
+    # Use the official Node.js image
+    FROM node:18
+
+    # Set the working directory
+    WORKDIR /app
+
+    # Copy package.json and package-lock.json
+    COPY package*.json ./
+
+    # Install dependencies
+    RUN npm install
+
+    # Copy the rest of the application code
+    COPY . .
+
+    # Set environment variables
+    ENV NODE_ENV=production
+
+    # Expose the application port
+    EXPOSE 3000
+
+    # Start the application
+    CMD ["npm", "start"]
+    ```
+
+3. **Create a `docker-compose.yml`**:
+
+    Create a `docker-compose.yml` file in the root of your project with the following content:
+
+    ```yaml
+    version: '3.8'
+
+    services:
+      db:
+        image: postgres:latest
+        environment:
+          POSTGRES_USER: your_db_user
+          POSTGRES_PASSWORD: your_db_password
+          POSTGRES_DB: event_registration
+        ports:
+          - "5432:5432"
+
+      web:
+        build: .
+        environment:
+          DATABASE_URL: postgres://your_db_user:your_db_password@db:5432/event_registration
+          JWT_SECRET: your_jwt_secret
+          PORT: 3000
+        ports:
+          - "3000:3000"
+        depends_on:
+          - db
+    ```
+
+### Building and Running with Docker
+
+1. **Build the Docker images**:
+
+    Navigate to the root of your project and run:
+
+    ```sh
+    docker-compose build
+    ```
+
+2. **Run the Docker containers**:
+
+    After building the images, start the containers with:
+
+    ```sh
+    docker-compose up
+    ```
+
+    This command will start both the PostgreSQL database and the Node.js application. The application will be accessible at `http://localhost:3000`.
+
+3. **Stopping the Containers**:
+
+    To stop the running containers, use:
+
+    ```sh
+    docker-compose down
+    ```
+
+### Database Initialization
+
+To initialize your PostgreSQL database with tables, you can run migrations inside the running container. Open a new terminal window and execute:
+
+```sh
+docker-compose exec web npx sequelize-cli db:migrate
