@@ -43,7 +43,7 @@ const addCart = async (req, res) => {
     const { username2, teamName, eventName } = req.body
     const user1 = req.user
 
-    if (!eventName || !teamName || !username2) {
+    if (!eventName || !teamName) {
         return res.status(400).json({ message: "Incomplete credentials" });
     }
 
