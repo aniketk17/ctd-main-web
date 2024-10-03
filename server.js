@@ -4,6 +4,8 @@ const helmet = require('helmet'); // For setting secure HTTP headers
 const rateLimit = require('express-rate-limit');
 const db = require('./config/db.js');
 const bodyParser = require('body-parser');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocs = require('./config/swagger.config.js');
 
 
 require('dotenv').config();
@@ -28,6 +30,8 @@ app.use(limiter);
 app.use('/auth', authRoutes);
 app.use('/api', protectedRoutes);
 
+// Set up Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 const initApp = async () => {
     console.log("Testing the database connection..");
