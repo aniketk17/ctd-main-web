@@ -6,14 +6,12 @@ const profileController = require('../controllers/profile.controller.js');
 const transactionController = require('../controllers/transaction.controller.js');
 const dashboardController = require('../controllers/dashboard.controller.js');
 
-router.post('/check_registration', authenticateToken, cartController.checkRegistration);
 router.post('/add_cart', authenticateToken, cartController.addCart);
 router.get('/view_cart', authenticateToken, cartController.viewCart);
 router.post('/delete/:eventName', authenticateToken, cartController.deleteCartItem);
 router.post('/delete_cart', authenticateToken, cartController.deleteCart);
 router.get('/my_orders', authenticateToken, cartController.myOrders);
-router.get('/confirm_team', cartController.confirmTeam);
-
+    
 router.get('/profile', authenticateToken, profileController.getProfile);
 router.patch('/profile', authenticateToken, profileController.updateProfile);
 

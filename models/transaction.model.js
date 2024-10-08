@@ -25,7 +25,7 @@ const Transaction = db.define('Transaction', {
         allowNull: false,
     },
     amount: {
-        type: DataTypes.INTEGER, // The total amount paid
+        type: DataTypes.INTEGER,
         allowNull: false,
     },
     is_verified: {

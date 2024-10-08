@@ -5,7 +5,7 @@ const authenticateToken = (req, res, next) => {
     const token = req.cookies.jwt;
 
     if (!token) {
-        return res.status(403).json({ message: "please login" }); // Forbidden
+        return res.status(403).json({ message: "Please login." }); // Forbidden
     }
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {

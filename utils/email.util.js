@@ -1,6 +1,5 @@
 const nodemailer = require('nodemailer');
 
-
 // For first Mail ID (credenz.updates@gmail.com)
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -12,12 +11,12 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendEmail = (to, subject, text) => {
+const sendEmail = (to, subject, html) => {  // Change 'text' to 'html'
   const mailOptions = {
     from: process.env.SMTP_USER,
     to,
     subject,
-    text,
+    html,  // Use 'html' field for HTML-formatted email
   };
 
   return transporter.sendMail(mailOptions);
@@ -35,12 +34,12 @@ const transporter2 = nodemailer.createTransport({
   },
 });
 
-const sendEmail2 = (to, subject, text) => {
+const sendEmail2 = (to, subject, html) => {  // Change 'text' to 'html'
   const mailOptions = {
     from: process.env.SMTP_USER2,
     to,
     subject,
-    text,
+    html,  // Use 'html' field for HTML-formatted email
   };
 
   return transporter2.sendMail(mailOptions);
