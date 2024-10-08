@@ -14,7 +14,7 @@ const Cart = db.define('Cart', {
         references: {
             model: User,
             key: 'username',
-        } 
+        }
     },
     user2: {
         type: DataTypes.STRING,
@@ -22,7 +22,7 @@ const Cart = db.define('Cart', {
         references: {
             model: User,
             key: 'username',
-        } 
+        }
     },
     event_name: {
         type: DataTypes.STRING,
@@ -37,6 +37,9 @@ const Cart = db.define('Cart', {
         defaultValue: false,
         allowNull: false,
     }
+}, {
+    tableName: 'carts',
+    timestamps: true,
 });
 
 User.hasMany(Cart, { foreignKey: 'user1' });

@@ -34,6 +34,9 @@ const Token = db.define('Token', {
         type: DataTypes.DATE,
         allowNull: false,
     },
+}, {
+    tableName: 'tokens',
+    timestamps: true,
 });
 
 module.exports = Token;

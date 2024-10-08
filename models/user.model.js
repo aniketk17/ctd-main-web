@@ -54,8 +54,9 @@ const User = db.define('User', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+}, {
+    tableName: 'users',
+    timestamps: true,
 });
 
-module.exports = User;      
-
-
+module.exports = User;
