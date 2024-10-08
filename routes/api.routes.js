@@ -4,6 +4,7 @@ const { authenticateToken } = require('../middlewares/auth.middleware.js');
 const cartController = require('../controllers/cart.controller.js');
 const profileController = require('../controllers/profile.controller.js');
 const transactionController = require('../controllers/transaction.controller.js');
+const dashboardController = require('../controllers/dashboard.controller.js');
 
 router.post('/check_registration', authenticateToken, cartController.checkRegistration);
 router.post('/add_cart', authenticateToken, cartController.addCart);
@@ -17,6 +18,8 @@ router.get('/profile', authenticateToken, profileController.getProfile);
 router.patch('/profile', authenticateToken, profileController.updateProfile);
 
 router.post('/submitTransaction', authenticateToken, transactionController.submitTransaction);
-router.post('/verifyTransaction', authenticateToken, transactionController.verifyTransaction);
+
+router.get('/getAllTransactions', authenticateToken, dashboardController.getAllTransactions);
+router.post('/verifyTransaction', authenticateToken, dashboardController.verifyTransactionFromDashboard);  
 
 module.exports = router;

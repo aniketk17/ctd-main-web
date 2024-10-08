@@ -15,7 +15,7 @@ const generateUserId = () => {
 
 // To check if enrollment number is in the correct format MODIFY LATER
 const isValidEnrollmentNumber = (enrollment_number) => {
-  const regex = /^(C2K|I2K|E2K|ECE2K|AIDS2K)\d{5,6}$/;
+  const regex = /^(C2K|I2K|E2K|ECE2K|AIDS2K)\d{5,8}$/;
   return regex.test(enrollment_number);
 };
 

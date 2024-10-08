@@ -5,7 +5,6 @@ const rateLimit = require('express-rate-limit');
 const db = require('./config/db.js');
 const bodyParser = require('body-parser');
 
-
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth.routes.js');
@@ -27,7 +26,7 @@ app.use(limiter);
 
 app.use('/auth', authRoutes);
 app.use('/api', protectedRoutes);
-
+app.use('/protected', protectedRoutes);
 
 const initApp = async () => {
     console.log("Testing the database connection..");

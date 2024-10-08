@@ -1,6 +1,13 @@
-const { Transaction } = require('../models/transaction.model.js');
+const Transaction = require('../models/transaction.model.js');
 const Cart = require('../models/cart.model.js');
 const { Op } = require('sequelize');
+
+const eventPrices = {
+    'NCC': 50,
+    'RC': 50,
+    'NTH': 0,
+    'Enigma': 50,
+};
 
 // Controller for submitting the transaction
 const submitTransaction = async (req, res) => {
@@ -12,23 +19,21 @@ const submitTransaction = async (req, res) => {
     }
 
     try {
-        // Fetch all events in the cart for the current user
         const userCartItems = await Cart.findAll({
             where: {
                 [Op.or]: [{ user1: currentUser }, { user2: currentUser }],
                 is_paid: false,
             },
         });
+        console.log("here");
 
         if (userCartItems.length === 0) {
-            return res.status(404).json({ message: "No unpaid events found in the cart." });
+            return res.status(404).json({ message: "No unpaid events in the cart." });
         }
 
-        // Prepare data to store in the transaction table
         const eventNames = userCartItems.map(item => item.event_name);
         const totalAmount = eventNames.reduce((total, eventName) => total + (eventPrices[eventName] || 0), 0);
 
-        // Save the transaction details in the Transaction table
         await Transaction.create({
             user: currentUser,
             transaction_code,

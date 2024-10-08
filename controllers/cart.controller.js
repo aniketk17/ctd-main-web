@@ -9,6 +9,7 @@ function generateRandomToken() {
     return Math.floor(Math.random() * 900000) + 100000;
 }
 
+
 const checkRegistration = async (req, res) => {
     const { eventName } = req.body;
     const user1 = req.user;
@@ -18,20 +19,18 @@ const checkRegistration = async (req, res) => {
     }
 
     try {
-
-        let existingUser = await Cart.findOne({ where: { user1: user1.username, event_name: eventName } });
-
-        if (existingUser) {
-            return res.status(400).json({ message: "User already registered." });
-        }
-
-        existingUser = await Cart.findOne({ where: { user2: user1.username, event_name: eventName } });
+        const existingUser = await Cart.findOne({
+            where: {
+                event_name: eventName,
+                [Op.or]: [{ user1: user1.username }, { user2: user1.username }]
+            }
+        });
 
         if (existingUser) {
             return res.status(400).json({ message: "User already registered." });
         }
 
-        return res.status(201).json({ message: "Proceed." });
+        return res.status(200).json({ message: "Proceed." });
 
     } catch (error) {
         console.error("Error checking registration:", error);
@@ -54,32 +53,48 @@ const addCart = async (req, res) => {
     try {
         let cart;  
         if (!username2) {
+            const existingUser1 = await Cart.findOne({
+                where: {
+                    event_name: eventName,
+                    [Op.or]: [
+                        { user1: user1.username },
+                        { user2: user1.username },
+                    ]
+                }
+            });
+
+            if (existingUser1) {
+                return res.status(400).json({ message: "You are already registered for this event." });
+            }
+
             cart = await Cart.create({
                 user1: user1.username,
                 user2: null,
                 event_name: eventName,
                 team_name: teamName,
-            })
-            return res.status(201).json({ message: "Event added to cart." })
+            });
+            return res.status(201).json({ message: "Event added to cart." });
         }
 
         const isUser2 = await User.findOne({ where: { username: username2 } })
         if (!isUser2) {
-            return res.status(403).json({ message: "User 2 not registered." })
+            return res.status(403).json({ message: "One of the user is not registered." })
         }
 
-        const existingUser2 = await Cart.findOne({
+        const existingUser1OrUser2 = await Cart.findOne({
             where: {
                 event_name: eventName,
                 [Op.or]: [
+                    { user1: user1.username },
+                    { user2: user1.username },
                     { user1: username2 },
                     { user2: username2 },
-                ],
+                ]
             }
-        })
+        });
 
-        if (existingUser2) {
-            return res.status(400).json({ message: "User 2 already registered." });
+        if (existingUser1OrUser2) {
+            return res.status(400).json({ message: "One of the users is already registered for this event." });
         }
 
         const confirmationToken = generateRandomToken();
@@ -94,16 +109,24 @@ const addCart = async (req, res) => {
             expiresAt: new Date(Date.now() + 6 * 3600 * 1000) // Example: Expires in 6 hours
         });
 
-        const confirmationLink = `http://localhost:3000/api/confirm_team?token=${confirmationToken}`;
+        const confirmationLink = `http://localhost:3000/protected/confirm_team?token=${confirmationToken}`;
 
         const emailSubject = "Team Formation Request";
         const emailBody = `
-            Hi ${isUser2.username},
-            ${user1.username} (${user1.first_name} ${user1.last_name})wants to team up with you for the event "${eventName}".
-            Please click "${confirmationLink}" to confirm.
-            If you did not initiate this request, you can ignore this email.
-            Thank you!
-        `;
+        <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2 style="color: #4CAF50;">Team Formation Request</h2>
+        <p>Hi <strong>${isUser2.username}</strong>,</p>
+        <p><strong>${user1.username}</strong> (<em>${user1.first_name} ${user1.last_name}</em>) wants to team up with you for the event <strong>"${eventName}"</strong>.</p>
+        <p>Please click the button below to confirm your team:</p>
+        <a href="${confirmationLink}" style="display: inline-bl             ock; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: white; background-color: #4CAF50; text-decoration: none; border-radius: 5px;">Confirm Team</a>
+        <p>If you did not initiate this request, you can ignore this email.</p>
+        <p>Thank you!</p>
+        <hr style="border: 0; border-top: 1px solid #eee;">
+        <footer style="font-size: 12px; color: #aaa;">
+            <p>Event Team, Credenz</p>                  
+        </footer>
+    </div>
+`;
 
         // Send email to user2 with the confirmation link
         if(confirmationToken % 2 == 0) {
@@ -113,7 +136,7 @@ const addCart = async (req, res) => {
             await sendEmail2(isUser2.email, emailSubject, emailBody);
         }       
 
-        return res.status(201).json({ message: "event added to cart." })
+        return res.status(201).json({ message: "Email is sent to your teammate. Please ask them to click on the verification link." })
 
     } catch (error) {
         console.error("error while adding to cart: ", error)
@@ -148,7 +171,7 @@ const confirmTeam = async (req, res) => {
         });
 
         if (existingUser1) {
-            return res.status(400).json({ message: "User 1 is already registered for this event." });
+            return res.status(400).json({ message: "One of the members is already registered for this event." });
         }
 
         const existingUser2 = await Cart.findOne({
@@ -162,7 +185,7 @@ const confirmTeam = async (req, res) => {
         });
 
         if (existingUser2) {
-            return res.status(400).json({ message: "User 2 is already registered for this event." });
+            return res.status(400).json({ message: "One of the members is already registered for this event." });
         }
 
 
@@ -175,7 +198,7 @@ const confirmTeam = async (req, res) => {
 
         await Token.destroy({ where: { token: token } });
 
-        return res.status(200).json({ message: "Team is formed successfully" });
+        return res.status(200).json({ message: "Event added to cart successfully." });
     }
     catch (error) {
         console.log("Error in forming team", error);
@@ -186,7 +209,8 @@ const confirmTeam = async (req, res) => {
 const eventPrices = {
     'NCC': 50,
     'RC': 50,
-    'NTH': 0
+    'NTH': 0,
+    'Enigma': 50,
 };
 
 const viewCart = async (req, res) => {
@@ -195,9 +219,14 @@ const viewCart = async (req, res) => {
     try {
         const allUserEvents = await Cart.findAll({
             where: {
-                [Op.or]: [
-                    { user1: currentUser },
-                    { user2: currentUser },
+                [Op.and]: [
+                    {
+                        [Op.or]: [
+                            { user1: currentUser },
+                            { user2: currentUser },
+                        ],
+                    },
+                    { is_paid: false }
                 ],
             },
         });
@@ -214,11 +243,11 @@ const viewCart = async (req, res) => {
             };
         });
 
-        res.status(200).json({ cartItems: cartItemsWithPrices, totalPrice: totalPrice });
+        return res.status(200).json({ cartItems: cartItemsWithPrices, totalPrice: totalPrice });
     }
     catch (error) {
         console.error("Error fetching cart items: ", error);
-        res.status(500).json({ message: "Server Error", error });
+        return  res.status(500).json({ message: "Server Error", error });
     }
 }
 
