@@ -1,15 +1,35 @@
 version: '3.8'
 
 services:
-  
   db:
-    image: postgres:latest #pull form hub
+    image: postgres:latest
     environment:
       POSTGRES_USER: ctdmainadmin
-      POSTGRES_PASSWORD: ctdmain@2024
+      POSTGRES_PASSWORD: ctdmain2024
       POSTGRES_DB: ctd_test_db_2024
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  nginx:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+
+  nginx-conf:
+    build: ./nginx
+    ports:
+      - "801:80"
+    depends_on:
+      - app
+    restart: "on-failure"
 
   app:
     build:
@@ -18,10 +38,14 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgres://ctdmainadmin:ctdmain@2024@db:5432/ctd_test_db_2024
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
       - DATABASE_USERNAME=ctdmainadmin
       - DATABASE_NAME=ctd_test_db_2024
-      - DATABASE_PASSWORD=ctdmain@2024
-      - DATABASE_HOST=db 
+      - DATABASE_PASSWORD=ctdmain2024
     depends_on:
       - db
+    command: ["/wait-for-it.sh", "db:5432", "--", "node", "server.js"]
+
+volumes:
+  pgdata:

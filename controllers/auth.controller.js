@@ -121,35 +121,55 @@ const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
-    return res.status(400).json({ message: "email field is required." })
+    return res.status(400).json({ message: "Email field is required." });
   }
 
   try {
-    const user = await User.findOne({ where: { email } })
+    const user = await User.findOne({ where: { email } });
 
-    if (!user) {  
-      return res.status(404).json({ message: 'User not found' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
     }
 
     const otp = crypto.randomInt(100000, 999999).toString();
     const otpExpiration = new Date(Date.now() + process.env.OTP_EXPIRATION * 60000);
 
-    await user.update({ otp: otp, otp_expiration: otpExpiration });   
-    
-    if(otp % 2 == 0) {
-      await sendEmail(user.email, 'Password Reset OTP', `Your OTP is: ${otp}`);
-    }
-    else {
-      await sendEmail2(user.email, 'Password Reset OTP', `Your OTP is: ${otp}`);
+    await user.update({ otp: otp, otp_expiration: otpExpiration });
+
+    // Aesthetic HTML email content
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+        <h2 style="text-align: center; color: #4CAF50;">Password Reset OTP</h2>
+        <p style="font-size: 16px; color: #333;">Dear <strong>${user.username}</strong>,</p>
+        <p style="font-size: 16px; color: #333;">
+          We received a request to reset your password. Please use the following OTP to reset your password. 
+        </p>
+        <p style="font-size: 24px; font-weight: bold; text-align: center; color: #FF5722; margin: 20px 0;">
+          ${otp}
+        </p>
+        <p style="font-size: 16px; color: #333;">This OTP is valid for ${process.env.OTP_EXPIRATION} minutes.</p>
+        <p style="font-size: 16px; color: #333;">
+          If you did not request this, you can ignore this email. Your password will remain unchanged.
+        </p>
+        <p style="font-size: 16px; color: #333;">Thank you,<br>Team CTD</p>
+      </div>
+    `;
+
+    // Send email with OTP
+    if (otp % 2 === 0) {
+      await sendEmail(user.email, 'Password Reset OTP', emailHtml);
+    } else {
+      await sendEmail2(user.email, 'Password Reset OTP', emailHtml);
     }
 
-    return res.status(200).json({ message: "OTP has been sent to your email." })
+    return res.status(200).json({ message: "OTP has been sent to your email." });
 
   } catch (error) {
     console.error('Error sending OTP:', error);
     return res.status(500).json({ message: 'Server error', error });
   }
-}
+};
+
 
 const resetPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body
@@ -171,7 +191,7 @@ const resetPassword = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ message: 'Invalid OTP or OTP expired' });
+      return res.status(400).json({ message: 'Invalid OTP or OTP expired or wrong email.' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS));

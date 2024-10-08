@@ -1,23 +1,26 @@
-FROM ubuntu
+# Use the official Node.js image based on Ubuntu as a base image
+FROM node:18.19.1
+
+# Set the working directory
 WORKDIR /app
 
-RUN apt update
-RUN apt install -y curl
-RUN curl -sL https://deb.nodesource.com/setup_18.19.1 -o /tmp/nodesource_setup.sh
-RUN apt upgrade -y
-RUN apt install -y nodejs
-RUN apt install -y npm
+# Copy package.json and package-lock.json first to leverage Docker caching
+COPY package*.json ./
 
-
-COPY package.json package.json
-COPY package-lock.json package-lock.json
-COPY server.js server.js
-COPY . /app
-
+# Install app dependencies
 RUN npm install
-RUN npm install express
-# RUN rm -rf node_modules
 
+# Copy the wait-for-it.sh script into the container
+COPY wait-for-it.sh /wait-for-it.sh
 
-ENTRYPOINT ["node", "server.js"]
+# Ensure wait-for-it.sh has executable permissions
+RUN chmod +x /wait-for-it.sh
 
+# Copy the rest of the application code
+COPY . .
+
+# Expose the port your app runs on
+EXPOSE 3000
+
+# Define the command to run your application
+CMD ["node", "server.js"]
