@@ -40,18 +40,35 @@ const User = db.define('User', {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
     },
-    otp: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    otp_expiration: {
-        type: DataTypes.DATE,
-        allowNull: true,
-    },
     password: {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    NCC: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+    },
+    RC: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+    },
+    NTH: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+    },
+    Enigma: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+    },
+    DecodeRush: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+    }
 }, {
     tableName: 'users',
     timestamps: true,
