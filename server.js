@@ -4,13 +4,21 @@ const helmet = require('helmet'); // For setting secure HTTP headers
 const rateLimit = require('express-rate-limit');
 const db = require('./config/db.js');
 const bodyParser = require('body-parser');
-
+const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth.routes.js');
 const protectedRoutes = require('./routes/api.routes.js');
 
 const app = express();
+
+app.set('trust proxy', 1);
+
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    credentials: false
+}));
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.json());
