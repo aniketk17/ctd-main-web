@@ -8,8 +8,8 @@ const dashboardController = require('../controllers/dashboard.controller.js');
 
 router.post('/add_cart', authenticateToken, cartController.addCart);
 router.get('/view_cart', authenticateToken, cartController.viewCart);
-router.post('/delete/:eventName', authenticateToken, cartController.deleteCartItem);
-router.post('/delete_cart', authenticateToken, cartController.deleteCart);
+router.delete('/delete/:eventName', authenticateToken, cartController.deleteCartItem);
+router.delete('/delete_cart', authenticateToken, cartController.deleteCart);
 router.get('/my_orders', authenticateToken, cartController.myOrders);
     
 router.get('/profile', authenticateToken, profileController.getProfile);

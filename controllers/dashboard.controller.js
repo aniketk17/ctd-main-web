@@ -1,6 +1,7 @@
 const Transaction = require('../models/transaction.model.js');
 const Cart = require('../models/cart.model.js');
 const User = require('../models/user.model.js');
+const { Op } = require('sequelize');    
 
 const getAllTransactions = async (req, res) => {
     try {
@@ -63,16 +64,20 @@ const verifyTransactionFromDashboard = async (req, res) => {
 
                 if (cartItem) {
                     cartItem.is_paid = true;
+                    await cartItem.save();
 
                     const u1 = await User.findOne({ where: { username: cartItem.user1 } });
                     const u2 = await User.findOne({ where: { username: cartItem.user2 } });
 
-                    if (u1) u1.eventName = true;
-                    if (u2) u2.eventName = true;
+                    if (u1) {
+                        u1[eventName] = true;
+                        await u1.save();
+                    }
 
-                    await cartItem.save();
-                    if (u1) await u1.save();
-                    if (u2) await u2.save();
+                    if (u2) {
+                        u2[eventName] = true;              
+                        await u2.save();
+                    }
                 }
             }
             catch (eventError) {

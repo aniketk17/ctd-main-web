@@ -68,6 +68,14 @@ const User = db.define('User', {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
         allowNull: false,
+    },
+    otp: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    otp_expiration: {
+        type: DataTypes.DATE,
+        allowNull: true,
     }
 }, {
     tableName: 'users',

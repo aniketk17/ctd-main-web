@@ -51,9 +51,15 @@ const User = require('../models/user.model.js');
                     return res.status(400).json({ message: "One of the users is already registered for this event." });
                 }
                 
-                const user2 = await Cart.findOne({ where: { username: username2 } });
+                const user2 = await User.findOne({
+                    where: { username: username2 }
+                });
 
-                if (user1.is_junior !== user2.is_junior) {
+                const curr_user = await User.findOne({
+                    where: { username: user1.username }
+                });
+
+                if (curr_user.is_junior !== user2.is_junior) {
                     return res.status(400).json({ message: "Both users must have the same junior or senior status to proceed." });
                 }
 
@@ -69,7 +75,7 @@ const User = require('../models/user.model.js');
             else if ((!user_id && username2) || (user_id && !username2)) {
                 return res.status(400).json({ message: "Please pass both user_id and username fields"});
             }
-            await Cart.create({
+            await Cart.create({ 
                 user1: user1.username,
                 event_name: eventName,
                 team_name: teamName,
