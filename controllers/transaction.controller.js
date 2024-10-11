@@ -40,6 +40,17 @@ const submitTransaction = async (req, res) => {
             amount: totalAmount,
         });
 
+        await Cart.update(
+            { is_pending: true }, 
+            {
+                where: 
+                {
+                    [Op.or]: [{ user1: currentUser }, { user2: currentUser }],
+                    is_paid: true,
+                },
+        }
+        );
+
         res.status(200).json({ message: "Transaction submitted, pending verification." });
     }
     catch(error) {
