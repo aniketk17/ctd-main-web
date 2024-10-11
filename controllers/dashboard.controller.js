@@ -64,6 +64,7 @@ const verifyTransactionFromDashboard = async (req, res) => {
 
                 if (cartItem) {
                     cartItem.is_paid = true;
+                    cartItem.is_pending = false;
                     await cartItem.save();
 
                     const u1 = await User.findOne({ where: { username: cartItem.user1 } });

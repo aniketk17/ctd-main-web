@@ -117,7 +117,7 @@ const logout = (req, res) => {
 };
 
 
-const forgotPassword = async (req, res) => {
+const   forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   if (!email) {

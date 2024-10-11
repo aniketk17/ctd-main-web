@@ -17,6 +17,7 @@ const Transaction = db.define('Transaction', {
         }
     },
     transaction_code: {
+        unique: true,
         type: DataTypes.STRING,
         allowNull: false,
     },

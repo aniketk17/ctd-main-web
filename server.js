@@ -10,7 +10,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth.routes.js');
 const protectedRoutes = require('./routes/api.routes.js');
 
-const app = express();
+const app = express();                                                              
 
 app.set('trust proxy', 1);
 
@@ -51,7 +51,7 @@ const initApp = async () => {
 
 initApp();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

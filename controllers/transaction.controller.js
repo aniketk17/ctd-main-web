@@ -11,7 +11,7 @@ const eventPrices = {
 
 
 const submitTransaction = async (req, res) => {
-    const { transaction_code } = req.body;
+    const {transaction_code} = req.body;
     const currentUser = req.user.username;
 
     if(!transaction_code) {
@@ -19,6 +19,13 @@ const submitTransaction = async (req, res) => {
     }
 
     try {
+        const existingTransaction = await Transaction.findOne({
+            where: { transaction_code }
+        });
+
+        if(existingTransaction){
+            return res.status(400).json({message:"Transaction already exists"});
+        }
         const userCartItems = await Cart.findAll({
             where: {
                 [Op.or]: [{ user1: currentUser }, { user2: currentUser }],
@@ -41,12 +48,11 @@ const submitTransaction = async (req, res) => {
         });
 
         await Cart.update(
-            { is_pending: true }, 
+            { is_pending: true, is_paid: true }, 
             {
                 where: 
                 {
                     [Op.or]: [{ user1: currentUser }, { user2: currentUser }],
-                    is_paid: true,
                 },
         }
         );

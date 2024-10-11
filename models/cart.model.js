@@ -37,6 +37,11 @@ const Cart = db.define('Cart', {
         defaultValue: false,
         allowNull: false,
     },
+    is_pending:{
+        type:DataTypes.BOOLEAN,
+        allowNull:true,
+        defaultValue:null
+    }
 }, {
     tableName: 'carts',
     timestamps: true,

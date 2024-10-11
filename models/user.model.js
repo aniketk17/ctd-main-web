@@ -24,7 +24,7 @@ const User = db.define('User', {
         allowNull: false,
         unique: true,
         validate: {
-            isEmail: true,
+        isEmail: true,
         },
     },
     phone_number: {
