@@ -41,7 +41,7 @@ const Cart = db.define('Cart', {
         type:DataTypes.BOOLEAN,
         allowNull:true,
         defaultValue:null
-    }
+    }                                                               
 }, {
     tableName: 'carts',
     timestamps: true,

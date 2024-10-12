@@ -11,7 +11,7 @@ const getAllTransactions = async (req, res) => {
         // if (status === 'verified') {
         // whereClause.is_verified = true;
         // } else if (status === 'unverified') {
-        whereClause.is_verified = false;
+        whereClause.is_verified = false;    
         // }
 
         const transactions = await Transaction.findAll({
