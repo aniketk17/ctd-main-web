@@ -59,7 +59,7 @@ const User = db.define('User', {
         defaultValue: false,
         allowNull: false,
     },
-    Enigma: {
+    Enigma: {                                   
         type: DataTypes.BOOLEAN,
         defaultValue: false,
         allowNull: false,
