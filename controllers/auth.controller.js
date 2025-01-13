@@ -26,9 +26,9 @@ const register = async (req, res) => {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
-  if (!isValidEnrollmentNumber(enrollment_number)) {
-    return res.status(400).json({ message: 'Invalid Enrollment number' });
-  }
+  // if (!isValidEnrollmentNumber(enrollment_number)) {
+  //   return res.status(400).json({ message: 'Invalid Enrollment number' });
+  // }
 
   try {
     const userId = generateUserId();

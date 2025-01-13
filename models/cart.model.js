@@ -14,11 +14,30 @@ const Cart = db.define('Cart', {
         references: {
             model: User,
             key: 'username',
-        }
+        }, 
     },
     user2: {
         type: DataTypes.STRING,
         allowNull: true,
+        // defaultValue: null,
+        references: {
+            model: User,
+            key: 'username',
+        },
+    },
+    user3: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        // defaultValue: null,
+        references: {
+            model: User,
+            key: 'username',
+        } 
+    },
+    user4: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        // defaultValue: null,
         references: {
             model: User,
             key: 'username',
@@ -49,7 +68,11 @@ const Cart = db.define('Cart', {
 
 User.hasMany(Cart, { foreignKey: 'user1' });
 User.hasMany(Cart, { foreignKey: 'user2' });
+User.hasMany(Cart, { foreignKey: 'user3' });
+User.hasMany(Cart, { foreignKey: 'user4' });
 Cart.belongsTo(User, { foreignKey: 'user1' });
 Cart.belongsTo(User, { foreignKey: 'user2' });
+Cart.belongsTo(User, { foreignKey: 'user3' });
+Cart.belongsTo(User, { foreignKey: 'user4' });
 
 module.exports = Cart

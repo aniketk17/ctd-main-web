@@ -4,6 +4,9 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const db = require('./config/db.js');
 const bodyParser = require('body-parser');
+const webweaver = require('./models/webweaver.model.js')
+
+
 const cors = require('cors');
 require('dotenv').config();
 const authRoutes = require('./routes/auth.routes.js');
