@@ -3,10 +3,17 @@ const Cart = require('../models/cart.model.js');
 const { Op } = require('sequelize');
 
 const eventPrices = {
-    'NCC': 50,
+    'CLASH': 50,
     'RC': 50,
+    'DW': 50,
+    'XODIA': 50,
+    'CX': 50,
+    'WW': 50,
     'NTH': 0,
-    'Enigma': 50,
+    'WS': 50,
+    'ENIGMA': 50,
+    'BPLAN': 50,
+    'QUIZ': 50
 };
 
 const submitTransaction = async (req, res) => {
@@ -28,7 +35,7 @@ const submitTransaction = async (req, res) => {
 
         const userCartItems = await Cart.findAll({
             where: {
-                [Op.or]: [{ user1: currentUser }, { user2: currentUser }],
+                [Op.or]: [{ user1: currentUser }, { user2: currentUser }, { user3: currentUser}, { user4: currentUser}],
                 is_paid: false,
             },
         });
@@ -54,7 +61,7 @@ const submitTransaction = async (req, res) => {
             {
                 where:
                 {
-                    [Op.or]: [{ user1: currentUser }, { user2: currentUser }],
+                    [Op.or]: [{ user1: currentUser }, { user2: currentUser }, { user3: currentUser}, { user4: currentUser}],
                     event_name: { [Op.in]: eventNames } // Update only the events in this transaction
                 },
             }
@@ -63,7 +70,7 @@ const submitTransaction = async (req, res) => {
         // Retrieve and return only the cart items that were part of the current transaction
         const updatedCart = await Cart.findAll({
             where: {
-                [Op.or]: [{ user1: currentUser }, { user2: currentUser }],
+                [Op.or]: [{ user1: currentUser }, { user2: currentUser }, { user3: currentUser}, { user4: currentUser}],
                 event_name: { [Op.in]: eventNames } // Return only the updated events
             },
         });

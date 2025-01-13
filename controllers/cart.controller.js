@@ -1,7 +1,7 @@
 const { where, Op } = require('sequelize');
 const Cart = require('../models/cart.model.js');
 const User = require('../models/user.model.js');
-const Token = require('../models/token.model.js');
+// const Token = require('../models/token.model.js');
 const { sendEmail, sendEmail2 } = require('../utils/email.util.js');
 const Webweaver = require('../models/webweaver.model.js');
 
@@ -262,11 +262,12 @@ const viewCart = async (req, res) => {
                         [Op.or]: [
                             { user1: currentUser },
                             { user2: currentUser },
+                            { user3: currentUser },
+                            { user4: currentUser }
                         ],
                     },
-                    { is_paid: false }
-                    { user3: currentUser },
-                    { user4: currentUser }
+                    { is_paid: false },
+                    
                 ],
             },
         });
@@ -360,18 +361,6 @@ const deleteCart = async (req, res) => {
             }
         }
 
-        for(let i = 0; i < cartItems.length; i++) {
-            if (cartItems[i].eventName === 'WW') {
-                const cartItem = cartItems[i];
-                const WWItem = await Webweaver.destroy({
-                    where: {
-                      user: { [Op.in]: [cartItem.user1, cartItem.user2, cartItem.user3, cartItem.user4] }
-                    }
-                })
-                break;
-            }
-        }
-
         await Cart.destroy({
             where: {
                 [Op.or]: [
@@ -407,10 +396,34 @@ const myOrders = async (req, res) => {
                 ],
             }
         });
-        console.log(paidOrders);
-        return res.status(200).json({ paidOrders });
+        return res.status(200).json({ nonPendingOrders });
     } catch (error) {
-        console.error('Error fetching paid orders:', error);
+        console.error('Error fetching non-pending orders:', error);
+        return res.status(500).json({ message: 'Server error', error });
+    }
+};
+
+const mypendingOrders = async (req, res) => {
+    try {
+        const currentUser = req.user.username;
+
+        const pendingOrders = await Cart.findAll({
+            where: {
+                is_paid: true,
+                is_pending: true,
+                [Op.or]: [
+                    { user1: currentUser },
+                    { user2: currentUser },
+                    { user3: currentUser },
+                    { user4: currentUser },
+                ],
+            }
+        });
+
+        return res.status(200).json({ pendingOrders });
+    }
+    catch (error) {
+        console.error('Error fetching pending orders:', error);
         return res.status(500).json({ message: 'Server error', error });
     }
 };
