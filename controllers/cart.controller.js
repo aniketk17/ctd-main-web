@@ -4,6 +4,7 @@ const User = require('../models/user.model.js');
 // const Token = require('../models/token.model.js');
 const { sendEmail, sendEmail2 } = require('../utils/email.util.js');
 const Webweaver = require('../models/webweaver.model.js');
+const Pass = require('../models/pass.model.js')
 
 
 // Function to generate a random token 6 digits
@@ -13,8 +14,8 @@ function generateRandomToken() {
 
 const checkRegistration = async (req, res) => {
     const { eventName } = req.body;
-    
-    
+
+
 
     if (!eventName) {
         return res.status(400).json({ message: "Event name is required." });
@@ -62,24 +63,42 @@ const addCart = async (req, res) => {
         return res.status(400).json({ message: "You cannot team up with yourself." });
     }
 
-
-
     try {
 
-        if (eventName === "webweaver") {
-            const existingUser = await Webweaver.findOne({
+        if (eventName === "WW") {
+
+            const usernames = [username2, username3, username4];
+            const existingUsers = await User.findAll({
+                where: {
+                    username: {
+                        [Op.in]: usernames
+                    }
+                }
+            });
+
+            const existingUsernames = existingUsers.map(user => user.username);
+            const unregisteredUsernames = usernames.filter(username => !existingUsernames.includes(username));
+            console.log(unregisteredUsernames);
+            if (unregisteredUsernames.length > 0) {
+                const usernamesStr = unregisteredUsernames.join(', ');
+                return res.status(400).json({ message: `${usernamesStr} not registered.` });
+            }
+
+            const registeredUsers = await Webweaver.findAll({
                 where: {
                     [Op.or]: [
                         { user: username2 },
                         { user: username3 },
                         { user: username4 }
                     ]
-                }
+                },
             });
 
-            if (existingUser) {
-                return res.status(400).json({ message: `${existingUser.username} already registered for an event.` });
+            if (registeredUsers.length > 0) {
+                const usernames = registeredUsers.map(user => user.user).join(', ');
+                return res.status(400).json({ message: `${usernames} already registered for an event.` });
             }
+
             const webweaverObjs = await Webweaver.bulkCreate([
                 { user: user1.username },
                 { user: username2 },
@@ -92,32 +111,45 @@ const addCart = async (req, res) => {
                 user2: username2,
                 user3: username3,
                 user4: username4,
-                event_name: eventName, 
-                team_name: teamName   
+                event_name: eventName,
+                team_name: teamName
             });
-            
-            if(cart) {
+
+            if (cart) {
                 return res.status(201).json({ message: "Event added to cart." })
             }
         }
 
+        const userPass = await Pass.findOne({ where: { user: user1.username } });
         let cart;
         if (!username2) {
-            cart = await Cart.create({
-                user1: user1.username,
-                user2: null,
-                event_name: eventName,
-                team_name: teamName,
-            })
-            return res.status(201).json({ message: "Event added to cart." })
+            if (userPass) {
+                cart = await Cart.create({
+                    user1: user1.username,
+                    user2: null,
+                    event_name: eventName,
+                    team_name: teamName,
+                    is_paid: true
+                })
+                return res.status(201).json({ message: "Event Registration sucessfully." });
+            }
+            else {
+                cart = await Cart.create({
+                    user1: user1.username,
+                    user2: null,
+                    event_name: eventName,
+                    team_name: teamName,
+                })
+                return res.status(201).json({ message: "Event added to cart." });
+            }
         }
 
         const isUser2 = await User.findOne({ where: { username: username2 } })
         if (!isUser2) {
-            return res.status(403).json({ message: "User 2 not registered." })
+            return res.status(403).json({ message: `${username2} not registered.` })
         }
-
-        const existingUser2 = await Cart.findOne({
+        
+        const existingUser1 = await Cart.findOne({
             where: {
                 event_name: eventName,
                 [Op.or]: [
@@ -127,8 +159,41 @@ const addCart = async (req, res) => {
             },
         });
 
+        if (existingUser1) {
+            return res.status(400).json({ message: `${user1.username} already registered for an event.` });
+        }
+
+        const existingUser2 = await Cart.findOne({
+            where: {
+                event_name: eventName,
+                [Op.or]: [
+                    { user1: username2 },
+                    { user2: username2 },
+                ],
+            },
+        });
+
         if (existingUser2) {
-            return res.status(400).json({ message: "User 2 already registered." });
+            return res.status(400).json({ message: `${username2} already registered for an event.` });
+        }
+
+        if (userPass) {
+            cart = await Cart.create({
+                user1: user1.username,
+                user2: username2,
+                event_name: eventName,
+                team_name: teamName,
+                is_paid: true
+            });
+        }
+        else {
+            cart = await Cart.create({
+                user1: user1.username,
+                user2: username2,
+                event_name: eventName,
+                team_name: teamName,
+                is_paid: false
+            })
         }
 
         // const confirmationToken = generateRandomToken();
@@ -245,11 +310,6 @@ const eventPrices = {
     'QUIZ': 50
 };
 
-const buyPass = async (req, res) => {
-    const currentUser = req.user;
-
-    
-}
 
 const viewCart = async (req, res) => {
     const currentUser = req.user.username;
@@ -267,7 +327,7 @@ const viewCart = async (req, res) => {
                         ],
                     },
                     { is_paid: false },
-                    
+
                 ],
             },
         });
@@ -295,6 +355,7 @@ const viewCart = async (req, res) => {
 const deleteCartItem = async (req, res) => {
     const currentUser = req.user.username;
     const eventName = req.params.eventName;
+    console.log(eventName);
 
     try {
         const cartItem = await Cart.findOne({
@@ -308,17 +369,19 @@ const deleteCartItem = async (req, res) => {
                 ]
             }
         });
+        console.log(cartItem);
 
-        if (!cartItem) {
+        if (!cartItem || cartItem.is_paid === true) {
             return res.status(404).json({ message: 'Cart item not found.' });
         }
 
         if (eventName === 'WW') {
             const WWItem = await Webweaver.destroy({
                 where: {
-                  user: { [Op.in]: [cartItem.user1, cartItem.user2, cartItem.user3, cartItem.user4] }
+                    user: { [Op.in]: [cartItem.user1, cartItem.user2, cartItem.user3, cartItem.user4] }
                 }
             })
+            console.log("WW:", WWItem);
         }
 
         await cartItem.destroy();
@@ -336,25 +399,31 @@ const deleteCart = async (req, res) => {
     try {
         const cartItems = await Cart.findAll({
             where: {
-                [Op.or]: [
-                    { user1: currentUser },
-                    { user2: currentUser },
-                    { user3: currentUser },
-                    { user4: currentUser }
+                [Op.and]: [
+                    { is_paid: false },
+                    {
+                        [Op.or]: [
+                            { user1: currentUser },
+                            { user2: currentUser },
+                            { user3: currentUser },
+                            { user4: currentUser }
+                        ]
+                    }
                 ]
             }
         });
+        
 
         if (cartItems.length === 0) {
             return res.status(404).json({ message: 'Cart is already empty' });
         }
 
-        for(let i = 0; i < cartItems.length; i++) {
+        for (let i = 0; i < cartItems.length; i++) {
             if (cartItems[i].eventName === 'WW') {
                 const cartItem = cartItems[i];
                 const WWItem = await Webweaver.destroy({
                     where: {
-                      user: { [Op.in]: [cartItem.user1, cartItem.user2, cartItem.user3, cartItem.user4] }
+                        user: { [Op.in]: [cartItem.user1, cartItem.user2, cartItem.user3, cartItem.user4] }
                     }
                 })
                 break;

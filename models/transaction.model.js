@@ -24,7 +24,7 @@ const Transaction = db.define('Transaction', {
     events: {
         type: DataTypes.ARRAY(DataTypes.STRING), // This stores event names as an array
         allowNull: false,
-    },
+    },  
     amount: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -32,6 +32,10 @@ const Transaction = db.define('Transaction', {
     is_verified: {
         type: DataTypes.BOOLEAN,
         defaultValue: false, // Initially false, will change after manual verification
+    },
+    is_pass: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 }, {
     tableName: 'transactions',

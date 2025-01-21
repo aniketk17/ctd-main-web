@@ -7,13 +7,23 @@ const getProfile = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        res.status(200).json({ user });
+        const userDTO = {
+            username: user.username,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            phone_number: user.phone_number,
+            enrollment_number: user.enrollment_number,
+            is_junior: user.is_junior
+        };
+        res.status(200).json({ user: userDTO });
     }
     catch(error) {
         console.error('Error fetching user profile:', error);
         res.status(500).json({ message: 'Server error' });
     }
-}
+};
+
 
 const updateProfile = async (req, res) => {
     try {
@@ -31,8 +41,18 @@ const updateProfile = async (req, res) => {
         user.phone_number = phone_number || user.phone_number;
 
         await user.save();
+        const userDTO = {
+            username: user.username,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            phone_number: user.phone_number,
+            enrollment_number: user.enrollment_number,
+            is_junior: user.is_junior
+        };
+
         
-        res.status(200).json({ message: 'Profile updated successfully', user });
+        res.status(200).json({ message: 'Profile updated successfully', userDTO });
     }
     catch(error) {
         console.error('Error updating user profile:', error);

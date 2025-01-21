@@ -89,10 +89,10 @@ const login = async (req, res) => {
 
   try {
     const user = await User.findOne({ where: email ? { email } : { username } });
-
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(403).json({ message: 'Invalid crendentials' });
+    if (!user || !user.password || !(await bcrypt.compare(password, user.password))) {
+      return res.status(403).json({ message: 'Invalid credentials' });
     }
+    
 
     //jwt expires in 1 day
     const accessToken = jwt.sign({ id: user.id, email: user.email, username: user.username }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
@@ -100,6 +100,7 @@ const login = async (req, res) => {
     res.cookie('jwt', accessToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 24 * 60 * 60 * 1000 });
     res.json({ message: 'Logged in successfully', userId: user.user_id });
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Server error', error });
   }
 };
@@ -182,20 +183,21 @@ const resetPassword = async (req, res) => {
   try {
     const user = await User.findOne({
       where: {
-        email,
-        otp: otp,
-        otp_expiration: {   
-          [Op.gt]: new Date(),
+        email: email,
+        otp: otp,     
+        otp_expiration: {
+          [Op.gt]: new Date(), 
         },
       },
     });
+    console.log(user);
 
     if (!user) {
       return res.status(400).json({ message: 'Invalid OTP or OTP expired or wrong email.' });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS));
-    await user.update({ password: hashedPassword, otp: null, otpExpiration: null });
+    await user.update({ password: hashedPassword, otp: null, otp_expiration: null });
 
     res.status(200).json({ message: 'Password reset successful' });
   } catch (error) {

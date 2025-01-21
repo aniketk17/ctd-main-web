@@ -5,6 +5,7 @@ const cartController = require('../controllers/cart.controller.js');
 const profileController = require('../controllers/profile.controller.js');
 const transactionController = require('../controllers/transaction.controller.js');
 const dashboardController = require('../controllers/dashboard.controller.js');
+const passController = require('../controllers/pass.controller.js')
 
 // Cart routes
 router.post('/add_cart', authenticateToken, cartController.addCart);
@@ -22,6 +23,9 @@ router.patch('/profile', authenticateToken, profileController.updateProfile);
 
 // Transaction routes
 router.post('/submitTransaction', authenticateToken, transactionController.submitTransaction);
+
+// pass routes
+router.post('/buy_pass', authenticateToken, passController.EventPass)
 
 // Dashboard routes
 router.get('/getAllTransactions', authenticateToken, dashboardController.getAllTransactions);

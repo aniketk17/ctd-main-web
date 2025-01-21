@@ -3,7 +3,6 @@ require('dotenv').config();
 
 const authenticateToken = (req, res, next) => {
     const token = req.cookies.jwt;
-
     if (!token) {
         return res.status(403).json({ message: "Please login." }); // Forbidden
     }

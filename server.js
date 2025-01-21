@@ -20,31 +20,31 @@ const allowedOrigins = [
   /^https:\/\/.*\.credenz\.co\.in$/
 ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // Allow requests with no origin (e.g., curl)
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (!origin) return callback(null, true); // Allow requests with no origin (e.g., curl)
     
-    if (allowedOrigins.some(allowedOrigin => 
-      typeof allowedOrigin === 'string' 
-        ? origin === allowedOrigin 
-        : allowedOrigin.test(origin)
-    )) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-CSRF-Token'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  credentials: true,
-  maxAge: 86400,  // 24 hours
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
+//     if (allowedOrigins.some(allowedOrigin => 
+//       typeof allowedOrigin === 'string' 
+//         ? origin === allowedOrigin 
+//         : allowedOrigin.test(origin)
+//     )) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-CSRF-Token'],
+//   exposedHeaders: ['Content-Range', 'X-Content-Range'],
+//   credentials: true,
+//   maxAge: 86400,  // 24 hours
+//   preflightContinue: false,
+//   optionsSuccessStatus: 204
+// };
 
 // Apply CORS middleware before other middlewares and route handlers
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 // Logging preflight requests
 app.options('*', (req, res) => {
