@@ -31,11 +31,6 @@ const User = db.define('User', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    enrollment_number: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-    },
     is_junior: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
@@ -51,6 +46,11 @@ const User = db.define('User', {
     password: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    college_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "PICT"
     }
 }, {
     tableName: 'users',

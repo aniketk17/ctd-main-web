@@ -123,13 +123,14 @@ const addCart = async (req, res) => {
         const userPass = await Pass.findOne({ where: { user: user1.username } });
         let cart;
         if (!username2) {
-            if (userPass) {
+            if (userPass && eventName != "ROBOLIGA") {
                 cart = await Cart.create({
                     user1: user1.username,
                     user2: null,
                     event_name: eventName,
                     team_name: teamName,
-                    is_paid: true
+                    is_paid: true,
+                    is_pending: true
                 })
                 return res.status(201).json({ message: "Event Registration sucessfully." });
             }
@@ -177,14 +178,16 @@ const addCart = async (req, res) => {
             return res.status(400).json({ message: `${username2} already registered for an event.` });
         }
 
-        if (userPass) {
+        if (userPass && eventName !== "ROBOLIGA") {
             cart = await Cart.create({
                 user1: user1.username,
                 user2: username2,
                 event_name: eventName,
                 team_name: teamName,
-                is_paid: true
+                is_paid: true,
+                is_pending: true
             });
+            return res.status(201).json({ message: "Event Registration sucessfully." });
         }
         else {
             cart = await Cart.create({
@@ -307,7 +310,8 @@ const eventPrices = {
     'WS': 50,
     'ENIGMA': 50,
     'BPLAN': 50,
-    'QUIZ': 50
+    'QUIZ': 50,
+    'ROBOLIGA': 50,
 };
 
 

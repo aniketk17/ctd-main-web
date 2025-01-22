@@ -4,9 +4,9 @@ require('dotenv').config();
 const { v4: uuidv4 } = require('uuid');
 const User = require('../models/user.model.js');
 const { Op } = require('sequelize');
-const { sendEmail, sendEmail2 }  = require('../utils/email.util.js')
+const { sendEmail, sendEmail2 } = require('../utils/email.util.js')
 const crypto = require('crypto');
-  
+
 
 // To generate an unique userID of size 8 every time
 const generateUserId = () => {
@@ -20,9 +20,9 @@ const isValidEnrollmentNumber = (enrollment_number) => {
 };
 
 const register = async (req, res) => {
-  const { username, first_name, last_name, email, phone_number, enrollment_number, is_junior, password } = req.body;
+  const { username, first_name, last_name, email, phone_number, college_name, is_junior, password } = req.body;
 
-  if (!first_name || !last_name || !email || !username || !phone_number || !enrollment_number || !password) {
+  if (!first_name || !last_name || !email || !username || !phone_number || !password) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
@@ -38,7 +38,6 @@ const register = async (req, res) => {
         [Op.or]: [
           { email },
           { username },
-          { enrollment_number }
         ]
       }
     });
@@ -48,7 +47,6 @@ const register = async (req, res) => {
       const fields = [];
       if (existingUser.email === email) fields.push('Email');
       if (existingUser.username === username) fields.push('Username');
-      if (existingUser.enrollment_number === enrollment_number) fields.push('Enrollment number');
       return res.status(400).json({ message: `${message} ${fields.join(', ')}` });
     }
 
@@ -61,13 +59,26 @@ const register = async (req, res) => {
       last_name,
       email,
       phone_number,
-      enrollment_number,
       is_junior,
+      college_name: college_name || "PICT",
       password: hashedPassword,
       created_at: new Date(),
     });
 
-    res.status(201).json({ message: 'User registered successfully', user: newUser });
+    const userDTO = {
+      username: newUser.username,
+      first_name: newUser.first_name,
+      last_name: newUser.last_name,
+      email: newUser.email,
+      phone_number: newUser.phone_number,
+      is_junior: newUser.is_junior
+    };
+
+    const accessToken = jwt.sign({ id: newUser.id, email: newUser.email, username: newUser.username }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+
+    res.cookie('jwt', accessToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 24 * 60 * 60 * 1000 });
+
+    res.status(201).json({ message: 'User registered successfully', user: userDTO});
   }
   catch (error) {
     console.error("error in registering user: ", error);
@@ -92,7 +103,7 @@ const login = async (req, res) => {
     if (!user || !user.password || !(await bcrypt.compare(password, user.password))) {
       return res.status(403).json({ message: 'Invalid credentials' });
     }
-    
+
 
     //jwt expires in 1 day
     const accessToken = jwt.sign({ id: user.id, email: user.email, username: user.username }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
@@ -106,7 +117,7 @@ const login = async (req, res) => {
 };
 
 const logout = (req, res) => {
-  
+
   // Check if the JWT or session identifier is already absent
   if (!req.cookies.jwt) {
     return res.status(401).json({ message: 'Already logged out' });
@@ -118,7 +129,7 @@ const logout = (req, res) => {
 };
 
 
-const   forgotPassword = async (req, res) => {
+const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -184,9 +195,9 @@ const resetPassword = async (req, res) => {
     const user = await User.findOne({
       where: {
         email: email,
-        otp: otp,     
+        otp: otp,
         otp_expiration: {
-          [Op.gt]: new Date(), 
+          [Op.gt]: new Date(),
         },
       },
     });

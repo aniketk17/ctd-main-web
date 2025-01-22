@@ -57,28 +57,31 @@ const verifyTransactionFromDashboard = async (req, res) => {
                         event_name: eventName,
                         [Op.or]: [
                             { user1: transactionUser },
-                            { user2: transactionUser }
+                            { user2: transactionUser },
+                            { user3: transactionUser },
+                            { user4: transactionUser },
                         ]
                     }
                 });
+                console.log("cartItem:", cartItem);
 
                 if (cartItem) {
                     cartItem.is_paid = true;
                     cartItem.is_pending = false;
                     await cartItem.save();
 
-                    const u1 = await User.findOne({ where: { username: cartItem.user1 } });
-                    const u2 = await User.findOne({ where: { username: cartItem.user2 } });
+                    // const u1 = await User.findOne({ where: { username: cartItem.user1 } });
+                    // const u2 = await User.findOne({ where: { username: cartItem.user2 } });
 
-                    if (u1) {
-                        u1[eventName] = true;
-                        await u1.save();
-                    }
+                    // if (u1) {
+                    //     u1[eventName] = true;
+                    //     await u1.save();
+                    // }
 
-                    if (u2) {
-                        u2[eventName] = true;              
-                        await u2.save();
-                    }
+                    // if (u2) {
+                    //     u2[eventName] = true;              
+                    //     await u2.save();
+                    // }
                 }
             }
             catch (eventError) {
@@ -94,9 +97,38 @@ const verifyTransactionFromDashboard = async (req, res) => {
     }
 };
 
+const getEventData = async (req, res) => {
+    const { eventName } = req.params;
 
+    try {
+        const participants = await Cart.findAll({
+            attributes: ['team_name'],
+            where: {
+                event_name: eventName,
+                is_paid: true,
+            },
+            include: [
+                { model: User, as: 'user1Details', attributes: ['username', 'email', 'first_name', 'last_name', 'phone_number', 'is_junior', 'college_name'] },
+                { model: User, as: 'user2Details', attributes: ['username', 'email', 'first_name', 'last_name', 'phone_number', 'is_junior', 'college_name'] },
+                { model: User, as: 'user3Details', attributes:['username', 'email', 'first_name', 'last_name', 'phone_number',  'is_junior', 'college_name'] },
+                { model: User, as: 'user4Details', attributes: ['username', 'email', 'first_name', 'last_name', 'phone_number', 'is_junior', 'college_name'] },
+            ],
+        });
+
+        res.status(200).json({ participants });
+    } catch (error) {
+        console.error('Error fetching event data:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+const register = async(req, res) => {
+    // const {}
+};
 
 module.exports = {
     getAllTransactions,
     verifyTransactionFromDashboard,
+    getEventData,
+
 };

@@ -13,7 +13,6 @@ const getProfile = async (req, res) => {
             last_name: user.last_name,
             email: user.email,
             phone_number: user.phone_number,
-            enrollment_number: user.enrollment_number,
             is_junior: user.is_junior
         };
         res.status(200).json({ user: userDTO });
@@ -47,7 +46,6 @@ const updateProfile = async (req, res) => {
             last_name: user.last_name,
             email: user.email,
             phone_number: user.phone_number,
-            enrollment_number: user.enrollment_number,
             is_junior: user.is_junior
         };
 

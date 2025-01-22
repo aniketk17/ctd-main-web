@@ -66,13 +66,25 @@ const Cart = db.define('Cart', {
     timestamps: true,
 });
 
-User.hasMany(Cart, { foreignKey: 'user1' });
-User.hasMany(Cart, { foreignKey: 'user2' });
-User.hasMany(Cart, { foreignKey: 'user3' });
-User.hasMany(Cart, { foreignKey: 'user4' });
-Cart.belongsTo(User, { foreignKey: 'user1' });
-Cart.belongsTo(User, { foreignKey: 'user2' });
-Cart.belongsTo(User, { foreignKey: 'user3' });
-Cart.belongsTo(User, { foreignKey: 'user4' });
+// User.hasMany(Cart, { foreignKey: 'user1' });
+// User.hasMany(Cart, { foreignKey: 'user2' });
+// User.hasMany(Cart, { foreignKey: 'user3' });
+// User.hasMany(Cart, { foreignKey: 'user4' });
+// Cart.belongsTo(User, { foreignKey: 'user1' });
+// Cart.belongsTo(User, { foreignKey: 'user2' });
+// Cart.belongsTo(User, { foreignKey: 'user3' });
+// Cart.belongsTo(User, { foreignKey: 'user4' });
+
+User.hasMany(Cart, { foreignKey: 'user1', sourceKey: 'username', as: 'user1CartRelations' });
+User.hasMany(Cart, { foreignKey: 'user2', sourceKey: 'username', as: 'user2CartRelations' });
+User.hasMany(Cart, { foreignKey: 'user3', sourceKey: 'username', as: 'user3CartRelations' });
+User.hasMany(Cart, { foreignKey: 'user4', sourceKey: 'username', as: 'user4CartRelations' });
+
+Cart.belongsTo(User, { foreignKey: 'user1', targetKey: 'username', as: 'user1Details' });
+Cart.belongsTo(User, { foreignKey: 'user2', targetKey: 'username', as: 'user2Details' });
+Cart.belongsTo(User, { foreignKey: 'user3', targetKey: 'username', as: 'user3Details' });
+Cart.belongsTo(User, { foreignKey: 'user4', targetKey: 'username', as: 'user4Details' });
+
+
 
 module.exports = Cart
