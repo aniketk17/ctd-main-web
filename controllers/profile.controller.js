@@ -1,4 +1,6 @@
+const Cart = require('../models/cart.model.js');
 const User = require('../models/user.model.js');
+const { where, Op } = require('sequelize');
 
 const getProfile = async (req, res) => {
     try {
@@ -14,7 +16,37 @@ const getProfile = async (req, res) => {
             email: user.email,
             phone_number: user.phone_number,
             is_junior: user.is_junior
-        };
+        }; 
+
+        const allUserEvents = await Cart.findAll({
+            where: {
+                [Op.and]: [
+                    {
+                        [Op.or]: [
+                            { user1: user.username },
+                            { user2: user.username },
+                            { user3: user.username },
+                            { user4: user.username }
+                        ],
+                    },
+                    { is_paid: true },
+                ],
+            },
+        });
+
+        const verifiedEvents = [];
+        const unverifiedEvents = [];
+        for(let i = 0; i < allUserEvents.length; i++) {
+            if(allUserEvents[i].is_pending === false) {
+                verifiedEvents.push(allUserEvents[i].event_name);
+            }
+            else{
+                unverifiedEvents.push(allUserEvents[i].event_name);
+            }
+        }
+
+        userDTO["verifiedEvents"] = verifiedEvents; 
+        userDTO["unverifiedEvents"] = unverifiedEvents;
         res.status(200).json({ user: userDTO });
     }
     catch(error) {

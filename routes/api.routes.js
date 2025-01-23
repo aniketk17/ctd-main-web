@@ -31,6 +31,6 @@ router.post('/buy_pass', authenticateToken, passController.EventPass)
 router.get('/getAllTransactions', authenticateToken, dashboardController.getAllTransactions);
 router.post('/verifyTransaction', authenticateToken, dashboardController.verifyTransactionFromDashboard);
 router.get('/getEventData/:eventName', authenticateToken, dashboardController.getEventData);
-// router.post('/register', authenticateToken, dashboardController.register);
+router.post('/register', authenticateToken, dashboardController.register);
 
 module.exports = router;

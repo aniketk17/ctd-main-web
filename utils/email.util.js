@@ -45,4 +45,25 @@ const sendEmail2 = (to, subject, html) => {  // Change 'text' to 'html'
   return transporter2.sendMail(mailOptions);
 };
 
-module.exports = { sendEmail, sendEmail2 };
+const transporter3 = nodemailer.createTransport({
+  host: process.env.SMTP_HOST3,
+  port: process.env.SMTP_PORT3,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER3,
+    pass: process.env.SMTP_PASS3,
+  },
+});
+
+const sendEmail3 = (to, subject, html) => {  // Change 'text' to 'html'
+  const mailOptions = {
+    from: process.env.SMTP_USER3,
+    to,
+    subject,
+    html,  // Use 'html' field for HTML-formatted email
+  };
+
+  return transporter3.sendMail(mailOptions);
+};
+
+module.exports = { sendEmail, sendEmail2, sendEmail3};
