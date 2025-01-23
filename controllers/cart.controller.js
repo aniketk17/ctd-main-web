@@ -50,22 +50,27 @@ const addCart = async (req, res) => {
     const user1 = req.user
 
     if (!eventName) {
-        return res.status(400).json({ message: "Please provide event name." });
+        return res.status(400).json({ message: "Please provide event name" });
     }
 
-    if (username2 === user1.username) {
-        return res.status(400).json({ message: "You cannot team up with yourself." });
+    if (username2 && username2 === user1.username && !username3 && !username4) {
+        return res.status(400).json({ message: "You cannot team up with yourself" });
     }
 
     if(username2 && !teamName) {
-        return res.status(400).json({ message: "Please provide team name." });
+        return res.status(400).json({ message: "Please provide team name" });
     }
 
     try {
 
         if (eventName === "WW") {
 
-            const usernames = [username2, username3, username4];
+            const usernames = [user1.username, username2, username3, username4];
+            const uniqueusernames = new Set(usernames);
+            if(uniqueusernames.size !== usernames.length) {
+                return res.status(400).json({ message: "usernames must be unique"});
+            }
+
             const existingUsers = await User.findAll({
                 where: {
                     username: {
@@ -85,6 +90,7 @@ const addCart = async (req, res) => {
             const registeredUsers = await Webweaver.findAll({
                 where: {
                     [Op.or]: [
+                        {user: user1.username},
                         { user: username2 },
                         { user: username3 },
                         { user: username4 }
@@ -154,6 +160,7 @@ const addCart = async (req, res) => {
         }
 
         const userPass = await Pass.findOne({ where: { user: user1.username }});
+        console.log(userPass);
         if (userPass && eventName !== "ROBOLIGA") {
             cart = await Cart.create({
                 user1: user1.username,
@@ -163,7 +170,7 @@ const addCart = async (req, res) => {
                 is_paid: true,
                 is_pending: true
             });
-            return res.status(201).json({ message: "Event Registration sucessfully." });
+            return res.status(201).json({ message: "Event Registration successfull." });
         }
         else {
             cart = await Cart.create({
@@ -256,7 +263,6 @@ const deleteCartItem = async (req, res) => {
                 ]
             }
         });
-        console.log(cartItem);
 
         if (!cartItem || cartItem.is_paid === true) {
             return res.status(404).json({ message: 'Cart item not found.' });
@@ -268,7 +274,6 @@ const deleteCartItem = async (req, res) => {
                     user: { [Op.in]: [cartItem.user1, cartItem.user2, cartItem.user3, cartItem.user4] }
                 }
             })
-            console.log("WW:", WWItem);
         }
 
         await cartItem.destroy();
@@ -300,13 +305,12 @@ const deleteCart = async (req, res) => {
             }
         });
         
-
         if (cartItems.length === 0) {
             return res.status(404).json({ message: 'Cart is already empty' });
         }
 
         for (let i = 0; i < cartItems.length; i++) {
-            if (cartItems[i].eventName === 'WW') {
+            if (cartItems[i].event_name === 'WW') {
                 const cartItem = cartItems[i];
                 const WWItem = await Webweaver.destroy({
                     where: {
@@ -319,11 +323,16 @@ const deleteCart = async (req, res) => {
 
         await Cart.destroy({
             where: {
-                [Op.or]: [
-                    { user1: currentUser },
-                    { user2: currentUser },
-                    { user3: currentUser },
-                    { user4: currentUser }
+                [Op.and]: [
+                    { is_paid: false },
+                    {
+                        [Op.or]: [
+                            { user1: currentUser },
+                            { user2: currentUser },
+                            { user3: currentUser },
+                            { user4: currentUser }
+                        ]
+                    }
                 ]
             }
         });

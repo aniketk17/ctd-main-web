@@ -24,6 +24,7 @@ const submitTransaction = async (req, res) => {
     }
 
     try {
+
         const existingTransaction = await Transaction.findOne({
             where: { transaction_code }
         });

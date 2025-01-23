@@ -17,7 +17,6 @@ const EventPass = async (req, res) => {
 
     try {
         const existingPass = await Pass.findOne({ where: { user: currentUser.username } });
-
         if (existingPass) {
             return res.status(400).json({ message: "You already have a pass" });
         }
@@ -56,4 +55,20 @@ const EventPass = async (req, res) => {
     };
 }
 
-module.exports = { EventPass }
+const checkPass = async(req, res) => {
+    const currentUser = req.user.username;
+    try{
+        const exisitingPass = await Pass.create({ where: { user: currentUser }});
+        if(exisitingPass) {
+            return res.status(400).json({ havePass: true } );
+        }
+        else{
+            return res.status(400).json({ havePass: false } );
+        }
+    }
+    catch (error) {
+        // console.log("Error in checking Pass")
+        res.status(500).json({ message: "Internal Server Error"});
+    } 
+}
+module.exports = { EventPass, checkPass}

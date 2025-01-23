@@ -25,7 +25,8 @@ router.patch('/profile', authenticateToken, profileController.updateProfile);
 router.post('/submitTransaction', authenticateToken, transactionController.submitTransaction);
 
 // pass routes
-router.post('/buy_pass', authenticateToken, passController.EventPass)
+router.post('/buy_pass', authenticateToken, passController.EventPass);
+router.get('/check_pass', authenticateToken, passController.checkPass);
 
 // Dashboard routes
 router.get('/getAllTransactions', authenticateToken, dashboardController.getAllTransactions);

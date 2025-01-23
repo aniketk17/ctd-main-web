@@ -21,7 +21,9 @@ const eventPrices = {
     'NTH': 0,
     'WS': 50,
     'ENIGMA': 50,
-    'BPLAN': 70,
+    'BPLAN': 50,
+    'QUIZ': 50,
+    'ROBOLIGA': 50,
 };
 
 const getAllTransactions = async (req, res) => {
