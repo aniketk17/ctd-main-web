@@ -58,9 +58,17 @@ const EventPass = async (req, res) => {
 const checkPass = async(req, res) => {
     const currentUser = req.user.username;
     try{
-        const exisitingPass = await Pass.create({ where: { user: currentUser }});
+        const exisitingPass = await Pass.findOne({ where: { user: currentUser }});
+        const passTransaction = await Pass.findOne({ 
+            [Op.and]: [
+                {
+                    user: currentUser,
+                },
+                is_paid = true
+            ]
+        })
         if(exisitingPass) {
-            return res.status(400).json({ havePass: true } );
+            return res.status(400).json({ havePass: true, } );
         }
         else{
             return res.status(400).json({ havePass: false } );

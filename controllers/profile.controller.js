@@ -1,5 +1,7 @@
 const Cart = require('../models/cart.model.js');
+const Transaction = require('../models/transaction.model.js');
 const User = require('../models/user.model.js');
+const Pass = require('../models/pass.model.js');
 const { where, Op } = require('sequelize');
 
 const getProfile = async (req, res) => {
@@ -47,6 +49,30 @@ const getProfile = async (req, res) => {
 
         userDTO["verifiedEvents"] = verifiedEvents; 
         userDTO["unverifiedEvents"] = unverifiedEvents;
+        const exisitingPass = await Pass.findOne({ where: { user: user.username }});
+        const passTransaction = await Transaction.findOne({ 
+            where: {
+                [Op.and]: [
+                    { user: user.username },
+                    { is_pass: true }
+                ]
+            }
+        });
+        
+
+        if(exisitingPass) {
+            userDTO["have_pass"] = true;
+            if(passTransaction.is_verified) {
+                userDTO["is_pass_verified"] = true;
+            }
+            else{
+                userDTO["is_pass_verified"] = false;
+            }
+        }
+        else{
+            userDTO["have_pass"] = false;
+            userDTO["is_pass_verified"] = false;
+        }
         res.status(200).json({ user: userDTO });
     }
     catch(error) {
