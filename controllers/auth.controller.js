@@ -107,12 +107,21 @@ const login = async (req, res) => {
       return res.status(403).json({ message: 'Invalid credentials' });
     }
 
+    const userDTO = {
+      username: user.username,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: newUser.email,
+      phone_number: user.phone_number,
+      is_junior: user.is_junior
+    };
+
 
     //jwt expires in 1 day
     const accessToken = jwt.sign({ id: user.id, email: user.email, username: user.username }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 
     res.cookie('jwt', accessToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 24 * 60 * 60 * 1000 });
-    res.json({ message: 'Logged in successfully', userId: user.user_id });
+    res.json({ message: 'Logged in successfully', user: userDTO });
   } catch (error) {
     console.log(error)
     res.status(500).json({ message: 'Server error', error });
