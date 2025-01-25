@@ -25,3 +25,6 @@ coverage/
 # IDE files
 .vscode/
 .idea/
+
+#ssl certificate
+.DigiCertGlobalRootG2.crt.pem

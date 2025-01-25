@@ -66,4 +66,44 @@ const sendEmail3 = (to, subject, html) => {  // Change 'text' to 'html'
   return transporter3.sendMail(mailOptions);
 };
 
-module.exports = { sendEmail, sendEmail2, sendEmail3};
+const { google } = require('googleapis');
+const OAuth2 = google.auth.OAuth2;
+const OAuth2_client = new OAuth2(
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET
+);
+OAuth2_client.setCredentials({ refresh_token: process.env.REFRESH_TOKEN });
+const sendEmail4 = async (firstName, lastName, senderMail, message) => {
+    try {
+        const accessToken = await OAuth2_client.getAccessToken();
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                type: "OAuth2",
+                user: process.env.PUBLIC_EMAIL,
+                clientId: process.env.CLIENT_ID,
+                clientSecret: process.env.CLIENT_SECRET,
+                refreshToken: process.env.REFRESH_TOKEN,
+                accessToken: accessToken.token,
+            },
+        });
+
+        const mailOptions = {
+            from: process.env.PUBLIC_EMAIL,
+            to: process.env.PUBLIC_EMAIL,
+            subject: `Message on Credenz Website from: ${senderMail}`,
+            html: `
+                <h2>First Name: ${firstName}</h2>
+                <h2>Last Name: ${lastName}</h2>
+                <p>${message}</p>
+            `,
+        };
+        const result = await transporter.sendMail(mailOptions);
+        return { success: true, result };
+    } catch (error) {
+        // console.error("Error sending email:", error);
+        return { success: false, error };
+    }
+};
+
+module.exports = { sendEmail, sendEmail2, sendEmail3, sendEmail4}

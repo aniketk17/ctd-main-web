@@ -51,6 +51,8 @@ const register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, parseInt(process.env.BCRYPT_SALT_ROUNDS));
+    const randomProfilePic = Math.floor(Math.random() * 10);
+    // console.log(randomProfilePic);
 
     const newUser = await User.create({
       id: userId,
@@ -63,6 +65,7 @@ const register = async (req, res) => {
       college_name: college_name || "PICT",
       password: hashedPassword,
       created_at: new Date(),
+      profile_pic: randomProfilePic
     });
 
     const userDTO = {

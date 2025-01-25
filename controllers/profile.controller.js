@@ -17,7 +17,8 @@ const getProfile = async (req, res) => {
             last_name: user.last_name,
             email: user.email,
             phone_number: user.phone_number,
-            is_junior: user.is_junior
+            is_junior: user.is_junior,
+            profile_pic: user.profile_pic
         }; 
 
         const allUserEvents = await Cart.findAll({

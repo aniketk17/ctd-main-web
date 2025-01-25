@@ -51,6 +51,15 @@ const User = db.define('User', {
         type: DataTypes.STRING,
         allowNull: false,
         defaultValue: "PICT"
+    },
+    profile_pic:{
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        validate:{
+            min: 0,
+            max: 10
+        }
     }
 }, {
     tableName: 'users',
