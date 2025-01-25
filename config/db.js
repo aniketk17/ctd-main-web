@@ -14,7 +14,7 @@ const db = new Sequelize(DATABASE_NAME, DATABASE_USERNAME, DATABASE_PASSWORD, {
     ssl: {
       require: true,
       rejectUnauthorized: false,
-      ca: fs.readFileSync('D:/CREDENZ-25/Main Website Backend/ctd-main-web/DigiCertGlobalRootG2.crt.pem').toString(),
+      ca: process.env.DATABASE_SSL_CA ? process.env.DATABASE_SSL_CA : undefined,
     },
   },
 });

@@ -166,7 +166,7 @@ const forgotPassword = async (req, res) => {
         <p style="font-size: 16px; color: #333;">
           If you did not request this, you can ignore this email. Your password will remain unchanged.
         </p>
-        <p style="font-size: 16px; color: #333;">Thank you,<br>Team CTD</p>
+        <p style="font-size: 16px; color: #333;">Thank you,<br>Team Credenz'25</p>
       </div>
     `;
 
