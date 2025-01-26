@@ -10,6 +10,7 @@ const feedbackController = require('../controllers/feedback.controller.js');
 
 // Cart routes
 router.post('/add_cart', authenticateToken, cartController.addCart);
+router.post('/check_registration', authenticateToken, cartController.checkRegistration);
 router.get('/view_cart', authenticateToken, cartController.viewCart);
 router.delete('/delete/:eventName', authenticateToken, cartController.deleteCartItem);
 router.delete('/delete_cart', authenticateToken, cartController.deleteCart);

@@ -1,6 +1,8 @@
 const Transaction = require('../models/transaction.model.js');
 const Cart = require('../models/cart.model.js');
+const User = require('../models/user.model.js')
 const { Op } = require('sequelize');
+const { sendConfirmationEmail } = require('../utils/email.util.js')
 
 const eventPrices = {
     'CLASH': 50,
@@ -35,7 +37,7 @@ const submitTransaction = async (req, res) => {
 
         const userCartItems = await Cart.findAll({
             where: {
-                [Op.or]: [{ user1: currentUser }, { user2: currentUser }, { user3: currentUser}, { user4: currentUser}],
+                [Op.or]: [{ user1: currentUser }, { user2: currentUser }, { user3: currentUser }, { user4: currentUser }],
                 is_paid: false,
             },
         });
@@ -61,21 +63,39 @@ const submitTransaction = async (req, res) => {
             {
                 where:
                 {
-                    [Op.or]: [{ user1: currentUser }, { user2: currentUser }, { user3: currentUser}, { user4: currentUser}],
-                    event_name: { [Op.in]: eventNames } // Update only the events in this transaction
+                    [Op.or]: [{ user1: currentUser }, { user2: currentUser }, { user3: currentUser }, { user4: currentUser }],
+                    event_name: { [Op.in]: eventNames }
                 },
             }
         );
 
-        // Retrieve and return only the cart items that were part of the current transaction
         const updatedCart = await Cart.findAll({
             where: {
-                [Op.or]: [{ user1: currentUser }, { user2: currentUser }, { user3: currentUser}, { user4: currentUser}],
-                event_name: { [Op.in]: eventNames } // Return only the updated events
+                [Op.or]: [
+                    { user1: currentUser },
+                    { user2: currentUser },
+                    { user3: currentUser },
+                    { user4: currentUser },
+                ],
+                event_name: { [Op.in]: eventNames },
             },
         });
 
-        res.status(200).json({ message: "Transaction submitted, pending verification.", Cart: updatedCart });
+        for (let i = 0; i < updatedCart.length; i++) {
+            const cartItem = updatedCart[i];
+    
+            const users = [cartItem.user1, cartItem.user2, cartItem.user3, cartItem.user4];
+            for (const username of users) {
+                if (username) {
+                    const user = await User.findOne({ where: { username } });
+                    if (user) {
+                        console.log(user.username)
+                        await sendConfirmationEmail(user, [cartItem.event_name]);
+                    }
+                }
+            }
+        }
+        res.status(200).json({ message: "Transaction submitted, pending verification."});
     }
     catch (error) {
         console.error("Error submitting transaction:", error);
@@ -84,4 +104,3 @@ const submitTransaction = async (req, res) => {
 };
 
 module.exports = { submitTransaction };
-        

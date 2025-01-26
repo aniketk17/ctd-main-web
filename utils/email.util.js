@@ -106,4 +106,36 @@ const sendEmail4 = async (firstName, lastName, senderMail, message) => {
     }
 };
 
-module.exports = { sendEmail, sendEmail2, sendEmail3, sendEmail4}
+const sendConfirmationEmail = async (user, eventNames) => {
+  try {
+      const username = user.username;
+
+      const emailHtml = `
+          <html>
+              <body>
+                  <h1>Hello ${username},</h1>
+                  <p>Congratulations! You have successfully registered for the following events:</p>
+                  <ul>
+                      ${eventNames.map((event) => `<li>${event}</li>`).join("")}
+                  </ul>
+                  <p>Thank you for your participation. We look forward to seeing you at the events!</p>
+              </body>
+          </html>
+      `;
+
+      const emailRandomNumber = Math.floor(Math.random() * 10);
+      if (emailRandomNumber < 5) {
+          await sendEmail(user.email, 'Event Registration Successful', emailHtml);
+      } else {
+          await sendEmail2(user.email, 'Event Registration Successful', emailHtml);
+      }
+
+      console.log(`Email sent successfully to ${user.email}`);
+  } catch (error) {
+      //console.error(`Failed to send email to ${user.email}:`, error);
+      throw new Error(`Error sending email to ${user.username}`);
+  }
+};
+
+
+module.exports = { sendEmail, sendEmail2, sendEmail3, sendEmail4, sendConfirmationEmail}

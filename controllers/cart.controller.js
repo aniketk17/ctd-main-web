@@ -1,7 +1,7 @@
 const { where, Op } = require('sequelize');
 const Cart = require('../models/cart.model.js');
 const User = require('../models/user.model.js');
-const { sendEmail, sendEmail2 } = require('../utils/email.util.js');
+const { sendEmail, sendEmail2, sendConfirmationEmail } = require('../utils/email.util.js');
 const Webweaver = require('../models/webweaver.model.js');
 const Pass = require('../models/pass.model.js')
 
@@ -11,6 +11,7 @@ function generateRandomToken() {
 
 const checkRegistration = async (req, res) => {
     const { eventName } = req.body;
+    const user1 = req.user;
     if (!eventName) {
         return res.status(400).json({ message: "Event name is required." });
     }
@@ -26,15 +27,14 @@ const checkRegistration = async (req, res) => {
         let existingUser = await Cart.findOne({ where: { user1: user1.username, event_name: eventName } });
 
         if (existingUser) {
-            return res.status(400).json({ message: "User already registered." });
+            return res.status(400).json({ message: "User already registered."});
         }
 
         existingUser = await Cart.findOne({ where: { user2: user1.username, event_name: eventName } });
 
         if (existingUser) {
-            return res.status(400).json({ message: "User already registered." });
+            return res.status(400).json({ message: "User already registered."});
         }
-
 
 
         return res.status(201).json({ message: "Proceed." });
@@ -81,7 +81,7 @@ const addCart = async (req, res) => {
 
             const existingUsernames = existingUsers.map(user => user.username);
             const unregisteredUsernames = usernames.filter(username => !existingUsernames.includes(username));
-            console.log(unregisteredUsernames);
+            // console.log(unregisteredUsernames);
             if (unregisteredUsernames.length > 0) {
                 const usernamesStr = unregisteredUsernames.join(', ');
                 return res.status(400).json({ message: `${usernamesStr} not registered.` });
@@ -160,7 +160,8 @@ const addCart = async (req, res) => {
         }
 
         const userPass = await Pass.findOne({ where: { user: user1.username }});
-        console.log(userPass);
+        // console.log(userPass);
+        let cart;
         if (userPass && eventName !== "ROBOLIGA") {
             cart = await Cart.create({
                 user1: user1.username,
@@ -170,7 +171,15 @@ const addCart = async (req, res) => {
                 is_paid: true,
                 is_pending: true
             });
+            const user2 = await User.findOne({ where: { username: username2 }});
+            if(cart){
+                await sendConfirmationEmail(user1,[eventName]);
+                if(user2) {
+                    await sendConfirmationEmail(user2,[eventName]);
+                }
+            }
             return res.status(201).json({ message: "Event Registration successfull." });
+
         }
         else {
             cart = await Cart.create({
@@ -249,7 +258,7 @@ const viewCart = async (req, res) => {
 const deleteCartItem = async (req, res) => {
     const currentUser = req.user.username;
     const eventName = req.params.eventName;
-    console.log(eventName);
+    // console.log(eventName);
 
     try {
         const cartItem = await Cart.findOne({
@@ -400,6 +409,7 @@ module.exports = {
     deleteCart,
     myOrders,  // non-pending orders where is_paid = true
     mypendingOrders,  // pending orders where is_paid = true
+    checkRegistration
 };
 
 

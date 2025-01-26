@@ -8,7 +8,7 @@ const Transaction = require('../models/transaction.model.js');
 const eventsArr = ["CLASH", "RC", "DW", "NTH", "CX", "ENIGMA", "WS", "BPLAN", "QUIZ", "XODIA"]
 
 const EventPass = async (req, res) => {
-    const currentUser = req.user;
+    const currentUser = req.user.username;
     const { transactionCode } = req.body;
 
     if (!transactionCode) {
@@ -16,7 +16,7 @@ const EventPass = async (req, res) => {
     }
 
     try {
-        const existingPass = await Pass.findOne({ where: { user: currentUser.username } });
+        const existingPass = await Pass.findOne({ where: { user: currentUser } });
         if (existingPass) {
             return res.status(400).json({ message: "You already have a pass" });
         }
@@ -32,7 +32,7 @@ const EventPass = async (req, res) => {
         }
 
         const newTransaction = await Transaction.create({
-            user: currentUser.username,
+            user: currentUser,
             transaction_code: transactionCode,
             events: eventsArr,
             amount: 50,
@@ -42,10 +42,37 @@ const EventPass = async (req, res) => {
 
         if(newTransaction) {
             const pass = await Pass.create({
-                user: currentUser.username,
+                user: currentUser,
             })
             if(pass) {
-                return res.status(200).json({ message: "Pass transaction successfull, verification pending" });
+                const [affectedCount, affectedRows] = await Cart.update(
+                    {
+                        is_paid: true,
+                        is_pending: true,
+                    },
+                    {
+                        where: {
+                            [Op.and]: [
+                                {
+                                    [Op.or]: [
+                                        { user1: currentUser },
+                                        { user2: currentUser },
+                                        { user3: currentUser },
+                                        { user4: currentUser },
+                                    ],
+                                },
+                                { is_paid: false },
+                                {
+                                    event_name: {
+                                        [Op.notIn]: ['WW', 'ROBOLOGIA'],
+                                    },
+                                },
+                            ],
+                        },
+                        returning: true,
+                    }
+                );             
+                return res.status(200).json({ message: "Pass transaction successfull, verification pending", updateCart: affectedRows});
             }
         }
 
