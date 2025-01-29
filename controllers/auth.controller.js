@@ -120,7 +120,7 @@ const login = async (req, res) => {
     //jwt expires in 1 day
     const accessToken = jwt.sign({ id: user.id, email: user.email, username: user.username }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 
-    res.cookie('jwt', accessToken, { httpOnly: true, secure: true, sameSite: 'Strict', maxAge: 24 * 60 * 60 * 1000 });
+    res.cookie('jwt', accessToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 24 * 60 * 60 * 1000 });
     res.json({ message: 'Logged in successfully', user: userDTO });
   } catch (error) {
     console.log(error)
