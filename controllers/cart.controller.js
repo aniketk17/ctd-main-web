@@ -18,7 +18,7 @@ const checkRegistration = async (req, res) => {
 
     try {
 
-        if (eventName === "webweaver") {
+        if (eventName === "WW") {
             let existingUser = await Webweaver.findOne({ where: { user: user1.username } });
             if (existingUser) {
                 return res.status(400).json({ message: "User already registered." });
@@ -141,7 +141,7 @@ const addCart = async (req, res) => {
         if(username2) {
             const isUser2 = await User.findOne({ where: { username: username2 } })
             if (!isUser2) {
-                return res.status(403).json({ message: `${username2} not registered.` })
+                return res.status(404).json({ message: `${username2} not registered.` })
             }
 
             const existingUser2 = await Cart.findOne({
