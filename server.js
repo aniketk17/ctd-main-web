@@ -4,9 +4,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const db = require('./config/db.js');
 const bodyParser = require('body-parser');
-const webweaver = require('./models/webweaver.model.js')
-
-
+const webweaver = require('./models/webweaver.model.js');
 const cors = require('cors');
 require('dotenv').config();
 const authRoutes = require('./routes/auth.routes.js');
@@ -16,39 +14,51 @@ const app = express();
 app.set('trust proxy', 1);  // Trust the proxy for getting real IPs
 
 const allowedOrigins = [
-  'https://ctd.credenz.co.in',
-  /^https:\/\/.*\.credenz\.co\.in$/
+  'https://ctd.credenz.co.in',  // Exact match
+  /^https:\/\/.*\.credenz\.co\.in$/,
+  'http://localhost:5173'  // Any subdomain of credenz.co.in
 ];
 
-// const corsOptions = {
-//   origin: function (origin, callback) {
-//     if (!origin) return callback(null, true); // Allow requests with no origin (e.g., curl)
-    
-//     if (allowedOrigins.some(allowedOrigin => 
-//       typeof allowedOrigin === 'string' 
-//         ? origin === allowedOrigin 
-//         : allowedOrigin.test(origin)
-//     )) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('Not allowed by CORS'));
-//     }
-//   },
-//   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-CSRF-Token'],
-//   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-//   credentials: true,
-//   maxAge: 86400,  // 24 hours
-//   preflightContinue: false,
-//   optionsSuccessStatus: 204
-// };
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) {
+      // Allow requests with no origin (e.g., direct calls via Postman, curl)
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.some(allowedOrigin => 
+      typeof allowedOrigin === 'string' 
+        ? origin === allowedOrigin 
+        : allowedOrigin.test(origin)
+    )) {
+      callback(null, true);
+    } else {
+      //console.error(`Blocked by CORS: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With', 
+    'Accept', 
+    'Origin', 
+    'X-CSRF-Token'
+  ],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  credentials: true,
+  maxAge: 86400,  // 24 hours
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
 
 // Apply CORS middleware before other middlewares and route handlers
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
-// Logging preflight requests
+// Handle preflight requests globally (logging them)
 app.options('*', (req, res) => {
-  console.log(`Preflight request for ${req.path}`);
+  console.log(`Preflight request for ${req.originalUrl}`);
   res.sendStatus(204);
 });
 
@@ -106,11 +116,11 @@ const initApp = async () => {
   } catch (error) {
     console.error("Unable to connect to the database:", error.original);
   }
-}
+};
 
 initApp();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
@@ -122,3 +132,4 @@ process.on('SIGTERM', () => {
     console.log('HTTP server closed');
   });
 });
+
