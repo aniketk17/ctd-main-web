@@ -1,29 +1,29 @@
-const Transaction = require('../models/transaction.model.js');
-const Cart = require('../models/cart.model.js');
-const User = require('../models/user.model.js');
-const { Op } = require('sequelize');
-const { v4: uuidv4 } = require('uuid');
-require('dotenv').config();
-const { sendEmail3 } = require('../utils/email.util.js')
-const bcrypt = require('bcrypt');
+const Transaction = require("../models/transaction.model.js");
+const Cart = require("../models/cart.model.js");
+const User = require("../models/user.model.js");
+const { Op } = require("sequelize");
+const { v4: uuidv4 } = require("uuid");
+require("dotenv").config();
+const { sendEmail3 } = require("../utils/email.util.js");
+const bcrypt = require("bcrypt");
 
 const generateUserId = () => {
     return uuidv4().slice(0, 8);
 };
 
 const eventPrices = {
-    'CLASH': 50,
-    'RC': 50,
-    'DW': 50,
-    'XODIA': 50,
-    'CX': 50,
-    'WW': 50,
-    'NTH': 0,
-    'WS': 50,
-    'ENIGMA': 50,
-    'BPLAN': 50,
-    'QUIZ': 50,
-    'ROBOLIGA': 50,
+    CLASH: 50,
+    RC: 50,
+    DW: 50,
+    XODIA: 50,
+    CX: 50,
+    WW: 50,
+    NTH: 0,
+    WS: 50,
+    ENIGMA: 50,
+    BPLAN: 50,
+    QUIZ: 50,
+    ROBOLIGA: 50,
 };
 
 const getAllTransactions = async (req, res) => {
@@ -39,30 +39,32 @@ const getAllTransactions = async (req, res) => {
 
         const transactions = await Transaction.findAll({
             where: whereClause,
-            order: [['createdAt', 'ASC']],
+            order: [["createdAt", "ASC"]],
         });
 
         res.status(200).json({ transactions });
-    }
-    catch (error) {
+    } catch (error) {
         console.error("Error fetching transactions:", error);
         res.status(500).json({ message: "Server error", error });
     }
 };
 
-
 const verifyTransactionFromDashboard = async (req, res) => {
     const { transaction_code } = req.body;
 
     try {
-        const transaction = await Transaction.findOne({ where: { transaction_code } });
+        const transaction = await Transaction.findOne({
+            where: { transaction_code },
+        });
 
         if (!transaction) {
             return res.status(404).json({ message: "Transaction not found." });
         }
 
         if (transaction.is_verified) {
-            return res.status(400).json({ message: "Transaction is already verified." });
+            return res
+                .status(400)
+                .json({ message: "Transaction is already verified." });
         }
 
         // Mark transaction as verified
@@ -83,8 +85,8 @@ const verifyTransactionFromDashboard = async (req, res) => {
                             { user2: transactionUser },
                             { user3: transactionUser },
                             { user4: transactionUser },
-                        ]
-                    }
+                        ],
+                    },
                 });
                 console.log("cartItem:", cartItem);
 
@@ -102,19 +104,25 @@ const verifyTransactionFromDashboard = async (req, res) => {
                     // }
 
                     // if (u2) {
-                    //     u2[eventName] = true;              
+                    //     u2[eventName] = true;
                     //     await u2.save();
                     // }
                 }
-            }
-            catch (eventError) {
-                console.error(`Error processing event ${eventName}:`, eventError);
-                return res.status(500).json({ message: `Error processing event ${eventName}`, error: eventError });
+            } catch (eventError) {
+                console.error(
+                    `Error processing event ${eventName}:`,
+                    eventError,
+                );
+                return res.status(500).json({
+                    message: `Error processing event ${eventName}`,
+                    error: eventError,
+                });
             }
         }
-        res.status(200).json({ message: "Transaction verified and cart updated successfully." });
-    }
-    catch (error) {
+        res.status(200).json({
+            message: "Transaction verified and cart updated successfully.",
+        });
+    } catch (error) {
         console.error("Error verifying transaction from dashboard:", error);
         res.status(500).json({ message: "Server error", error });
     }
@@ -125,43 +133,103 @@ const getEventData = async (req, res) => {
 
     try {
         const participants = await Cart.findAll({
-            attributes: ['team_name'],
+            attributes: ["team_name"],
             where: {
                 event_name: eventName,
                 is_paid: true,
             },
             include: [
-                { model: User, as: 'user1Details', attributes: ['username', 'email', 'first_name', 'last_name', 'phone_number', 'is_junior', 'college_name'] },
-                { model: User, as: 'user2Details', attributes: ['username', 'email', 'first_name', 'last_name', 'phone_number', 'is_junior', 'college_name'] },
-                { model: User, as: 'user3Details', attributes: ['username', 'email', 'first_name', 'last_name', 'phone_number', 'is_junior', 'college_name'] },
-                { model: User, as: 'user4Details', attributes: ['username', 'email', 'first_name', 'last_name', 'phone_number', 'is_junior', 'college_name'] },
+                {
+                    model: User,
+                    as: "user1Details",
+                    attributes: [
+                        "username",
+                        "email",
+                        "first_name",
+                        "last_name",
+                        "phone_number",
+                        "is_junior",
+                        "college_name",
+                    ],
+                },
+                {
+                    model: User,
+                    as: "user2Details",
+                    attributes: [
+                        "username",
+                        "email",
+                        "first_name",
+                        "last_name",
+                        "phone_number",
+                        "is_junior",
+                        "college_name",
+                    ],
+                },
+                {
+                    model: User,
+                    as: "user3Details",
+                    attributes: [
+                        "username",
+                        "email",
+                        "first_name",
+                        "last_name",
+                        "phone_number",
+                        "is_junior",
+                        "college_name",
+                    ],
+                },
+                {
+                    model: User,
+                    as: "user4Details",
+                    attributes: [
+                        "username",
+                        "email",
+                        "first_name",
+                        "last_name",
+                        "phone_number",
+                        "is_junior",
+                        "college_name",
+                    ],
+                },
             ],
         });
 
         res.status(200).json({ participants });
     } catch (error) {
-        console.error('Error fetching event data:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error("Error fetching event data:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 };
 
 const register = async (req, res) => {
-    const { first_name, last_name, email, phone_number, college_name, is_junior } = req.body;
+    const {
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        college_name,
+        is_junior,
+    } = req.body;
 
     if (!first_name || !last_name || !email || !phone_number) {
-        return res.status(400).json({ message: 'All fields are required' });
+        return res.status(400).json({ message: "All fields are required" });
     }
 
     try {
         const userId = generateUserId();
         const existingUser = await User.findOne({ where: { email } });
         if (existingUser) {
-            return res.status(400).json({ message: 'Email already registered' });
+            return res
+                .status(400)
+                .json({ message: "Email already registered" });
         }
         const randomNumber = Math.floor(1000 + Math.random() * 9000);
         const username = `${first_name.toLowerCase()}${last_name.toLowerCase()}${randomNumber}`;
         const rawPassword = Math.random().toString(36).slice(-8);
-        const hashedPassword = await bcrypt.hash(rawPassword, parseInt(process.env.BCRYPT_SALT_ROUNDS));
+        const hashedPassword = await bcrypt.hash(
+            rawPassword,
+            parseInt(process.env.BCRYPT_SALT_ROUNDS),
+        );
 
         const newUser = await User.create({
             id: userId,
@@ -181,11 +249,10 @@ const register = async (req, res) => {
             last_name: newUser.last_name,
             email: newUser.email,
             phone_number: newUser.phone_number,
-            is_junior: newUser.is_junior
+            is_junior: newUser.is_junior,
         };
 
-        const emailHtml =
-            `
+        const emailHtml = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
                 <p style="font-size: 16px; color: #333;">Dear <strong>${first_name} ${last_name}</strong>,</p>
                 <p style="font-size: 16px; color: #333;">
@@ -208,49 +275,71 @@ const register = async (req, res) => {
         `;
 
         await sendEmail3(newUser.email, "Login Credentials", emailHtml);
-        return res.status(200).json({ message: "User Registration Successfull, login credentials has been sent to the user email" });
+        return res.status(200).json({
+            message:
+                "User Registration Successfull, login credentials has been sent to the user email",
+        });
     } catch (error) {
-        console.error('Error:', error);
-        return res.status(500).json({ message: 'Server error', error });
+        console.error("Error:", error);
+        return res.status(500).json({ message: "Server error", error });
     }
 };
 
-const registerEvent = async(req, res)=> {
-    const {username1, username2, username3, username4, eventName, transaction_code } = req.body;
+const registerEvent = async (req, res) => {
+    const {
+        team_name,
+        username1,
+        username2,
+        username3,
+        username4,
+        eventName,
+        transaction_code,
+    } = req.body;
 
-    if(!Array.isArray(eventName) || eventName.length === 0) {
-        return res.status(404).json({ message: "Please provide eventName."});
+    if (!Array.isArray(eventName) || eventName.length === 0) {
+        return res.status(404).json({ message: "Please provide eventName." });
     }
 
-    if(!transaction_code) {
-        return res.status(404).json({ message: "Please provide transaction ID"})
+    if (!transaction_code) {
+        return res.status(400).json({ message: "Transaction ID is required." });
     }
 
-    try{
-
-        const transaction = await Transaction.findOne({ where: { transaction_code } });
+    try {
+        const transaction = await Transaction.findOne({
+            where: { transaction_code },
+        });
 
         if (transaction) {
-            return res.status(404).json({ message: "Transaction already exist" });
+            return res
+                .status(404)
+                .json({ message: "Transaction already exist" });
         }
 
-        const usernames = [username1, username2, username3, username4].filter(username => username !== null);
+        const usernames = [username1, username2, username3, username4].filter(
+            (username) => username !== null,
+        );
 
-        if(usernames.length === 0) {
-            return res.status(400).json({message: "At least one valid username is required"});
+        if (usernames.length === 0) {
+            return res
+                .status(400)
+                .json({ message: "At least one valid username is required" });
         }
 
         const users = await User.findAll({
             where: {
-                username: { [Op.in]: username }
-            }
+                username: { [Op.in]: usernames },
+            },
         });
 
-        if(users.length !== usernames.length) {
-            return res.status(404).json({ message: "One or more provided users do not exist."});
+        if (users.length !== usernames.length) {
+            return res
+                .status(404)
+                .json({ message: "One or more provided users do not exist." });
         }
 
-        const normalizedEventNames = eventName.map(event => event.toUppperCase());
+        const normalizedEventNames = eventName.map((event) =>
+            event.toUpperCase(),
+        );
 
         const existingRegistrations = await Cart.findAll({
             where: {
@@ -265,15 +354,24 @@ const registerEvent = async(req, res)=> {
             },
         });
 
-        if(existingRegistrations.length > 0) {
-            return res.status(400).json({ message: "One or more provided users already register for given events"});
+        if (existingRegistrations.length > 0) {
+            return res.status(400).json({
+                message:
+                    "One or more provided users already register for given events",
+            });
         }
 
-        const WWIndex = normalizedEventNames.findIndex(event => event === "WW");
-        const totalAmount = eventNames.reduce((total, eventName) => total + (eventPrices[eventName] || 0), 0);
+        const WWIndex = normalizedEventNames.findIndex(
+            (event) => event === "WW",
+        );
+        const totalAmount = normalizedEventNames.reduce(
+            (total, eventName) => total + (eventPrices[eventName] || 0),
+            0,
+        );
 
-        if(WWIndex !== -1 && users.length == 4) {
+        if (WWIndex !== -1 && users.length === 4) {
             await Cart.create({
+                team_name: team_name,
                 user1: username1,
                 user2: username2,
                 user3: username3,
@@ -281,50 +379,58 @@ const registerEvent = async(req, res)=> {
                 eventName: "WW",
                 is_paid: true,
                 is_pending: true,
-            })
-            normalizedEventNames.splice(WWIndex,1);
-        }
-        else{
-            return res.status(400).json({ message: "4 users are required for webweaver."});
+            });
+            normalizedEventNames.splice(WWIndex, 1);
+        } else {
+            return res
+                .status(400)
+                .json({ message: "4 users are required for webweaver." });
         }
 
-        for(let i = 0; i < normalizedEventNames.length; i++) {
-            if(!username2) {
+        for (let i = 0; i < normalizedEventNames.length; i++) {
+            if (!username2) {
                 await Cart.create({
                     user1: username1,
                     eventName: normalizedEventNames[i],
                     is_paid: true,
-                    is_pending: true
-                })
-            }
-            else{
+                    is_pending: true,
+                });
+            } else {
+                if (!team_name || team_name.trim() === "") {
+                    return res
+                        .status(400)
+                        .json({ message: "Please provide a team name." });
+                }
+
                 await Cart.create({
+                    team_name: team_name,
                     user1: username1,
                     user2: username2,
                     eventName: normalizedEventNames[i],
                     is_paid: true,
-                    is_pending: true
-                })
+                    is_pending: true,
+                });
             }
         }
-        
-        
-        const newTransaction = await transaction.create({
+
+        const newTransaction = await Transaction.create({
             user: username1,
             transaction_code,
             events: normalizedEventNames,
-            amount: totalAmount
-        })
+            amount: totalAmount,
+        });
 
-        return res.status(200).json({message: "Events Registration successfull"})
-    }catch(error) {
-        return res.status(501).json({ message: "Internal Sever Error"})
+        return res
+            .status(200)
+            .json({ message: "Events Registration successfull" });
+    } catch (error) {
+        return res.status(501).json({ message: "Internal Sever Error" });
     }
-}
+};
 module.exports = {
     getAllTransactions,
     verifyTransactionFromDashboard,
     getEventData,
     register,
-
+    registerEvent,
 };
