@@ -14,9 +14,9 @@ const app = express();
 app.set('trust proxy', 1);  // Trust the proxy for getting real IPs
 
 const allowedOrigins = [
-  'https://ctd.credenz.co.in',  // Exact match
+  'https://credenz.co.in',  // Exact match
   /^https:\/\/.*\.credenz\.co\.in$/,
-  'http://localhost:5173'  // Any subdomain of credenz.co.in
+    // Any subdomain of credenz.co.in
 ];
 
 const corsOptions = {
