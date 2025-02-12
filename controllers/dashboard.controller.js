@@ -288,10 +288,7 @@ const register = async (req, res) => {
 const registerEvent = async (req, res) => {
     const {
         team_name,
-        username1,
-        username2,
-        username3,
-        username4,
+        usernames,
         eventName,
         transaction_code,
     } = req.body;
@@ -315,14 +312,8 @@ const registerEvent = async (req, res) => {
                 .json({ message: "Transaction already exist" });
         }
 
-        const usernames = [username1, username2, username3, username4].filter(
-            (username) => username !== null,
-        );
-
         if (usernames.length === 0) {
-            return res
-                .status(400)
-                .json({ message: "At least one valid username is required" });
+            return res.status(400).json({ message: "At least one valid username is required" });
         }
 
         const users = await User.findAll({
@@ -332,10 +323,14 @@ const registerEvent = async (req, res) => {
         });
 
         if (users.length !== usernames.length) {
-            return res
-                .status(404)
-                .json({ message: "One or more provided users do not exist." });
+            return res.status(404).json({ message: "One or more provided users do not exist." });
         }
+
+        const username1 = usernames.length > 0 ? users[0].username : null;
+        const username2 = usernames.length > 1 ? users[1].username : null;
+        const username3 = usernames.length > 2 ? users[2].username : null;
+        const username4 = usernames.length > 3 ? users[3].username : null;
+
 
         const normalizedEventNames = eventName.map((event) =>
             event.toUpperCase(),
@@ -381,36 +376,37 @@ const registerEvent = async (req, res) => {
                 is_pending: true,
             });
             normalizedEventNames.splice(WWIndex, 1);
-        } else {
+        } else if (WWIndex !== -1) {
             return res
                 .status(400)
                 .json({ message: "4 users are required for webweaver." });
         }
-
+        //console.log(normalizedEventNames);
         for (let i = 0; i < normalizedEventNames.length; i++) {
-            if (!username2) {
-                await Cart.create({
-                    user1: username1,
-                    eventName: normalizedEventNames[i],
-                    is_paid: true,
-                    is_pending: true,
-                });
-            } else {
-                if (!team_name || team_name.trim() === "") {
-                    return res
-                        .status(400)
-                        .json({ message: "Please provide a team name." });
-                }
+            // if (!username2) {
+            //     await Cart.create({
+            //         user1: username1,
+            //         event_name: normalizedEventNames[i],
+            //         is_paid: true,
+            //         is_pending: true,
+            //     });
+            // } else {
+            //     if (!team_name || team_name.trim() === "") {
+            //         return res
+            //             .status(400)
+            //             .json({ message: "Please provide a team name." });
+            //     }
 
-                await Cart.create({
-                    team_name: team_name,
-                    user1: username1,
-                    user2: username2,
-                    eventName: normalizedEventNames[i],
-                    is_paid: true,
-                    is_pending: true,
-                });
-            }
+            //     await Cart.create({
+            //         team_name: team_name,
+            //         user1: username1,
+            //         user2: username2,
+            //         event_name: normalizedEventNames[i],
+            //         is_paid: true,
+            //         is_pending: true,
+            //     });
+            // }
+
         }
 
         const newTransaction = await Transaction.create({
@@ -424,6 +420,7 @@ const registerEvent = async (req, res) => {
             .status(200)
             .json({ message: "Events Registration successfull" });
     } catch (error) {
+        //console.log("server Error:", error);
         return res.status(501).json({ message: "Internal Sever Error" });
     }
 };

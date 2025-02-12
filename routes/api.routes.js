@@ -38,5 +38,7 @@ router.get('/getAllTransactions', authenticateToken, dashboardController.getAllT
 router.post('/verifyTransaction', authenticateToken, dashboardController.verifyTransactionFromDashboard);
 router.get('/getEventData/:eventName', authenticateToken, dashboardController.getEventData);
 router.post('/register', authenticateToken, dashboardController.register);
+router.post('/registerEvent', authenticateToken, dashboardController.registerEvent);
 
 module.exports = router;
+    
